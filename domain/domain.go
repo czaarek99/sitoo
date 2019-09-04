@@ -16,7 +16,7 @@ type ProductService interface {
 	GetProduct(id int, fields []string) (Product, error)
 	AddProduct(product Product) (int, error)
 	UpdateProduct(id int, product Product) error
-	DeleteProduct() error
+	DeleteProduct(id int) error
 }
 
 type ProductRepository interface {
@@ -24,6 +24,6 @@ type ProductRepository interface {
 	GetProduct(id int) (Product, error)
 	AddProduct(product Product) (int, error)
 	UpdateProduct(id int, product Product) error
-	DeleteProduct() error
+	DeleteProduct(id int) error
 	SkuExists(sku string) (bool, error)
 }
