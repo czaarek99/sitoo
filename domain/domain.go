@@ -25,4 +25,5 @@ type ProductRepository interface {
 	AddProduct(product Product) (int, error)
 	UpdateProduct(product Product) error
 	DeleteProduct() error
+	SkuExists(sku string) (bool, error)
 }
