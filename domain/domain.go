@@ -6,7 +6,7 @@ type Product struct {
 	ProductID   ProductId
 	Title       string
 	Sku         string
-	Barcodes    []int
+	Barcodes    []string
 	Description string
 	Price       string
 	Created     uint32
