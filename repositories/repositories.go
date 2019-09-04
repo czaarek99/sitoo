@@ -265,6 +265,7 @@ func (repo Repository) AddProduct(
 }
 
 func (repo Repository) UpdateProduct(
+	id domain.ProductId,
 	product domain.ProductUpdateInput,
 ) error {
 
