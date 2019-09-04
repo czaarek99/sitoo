@@ -27,7 +27,7 @@ func (service Service) GetProducts(
 }
 
 func (service Service) GetProduct(
-	id int,
+	id domain.ProductId,
 	fields []string,
 ) (domain.Product, error) {
 
@@ -47,25 +47,25 @@ func (service Service) GetProduct(
 
 func (service Service) AddProduct(
 	product domain.Product,
-) (int, error) {
+) (domain.ProductId, error) {
 
 	log.Println("Adding product")
 
 	exists, err := service.repo.SkuExists(product.Sku)
 
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	if exists {
-		return -1, errors.New(fmt.Sprintf("SKU '%s' already exists", product.Sku))
+		return 0, errors.New(fmt.Sprintf("SKU '%s' already exists", product.Sku))
 	}
 
 	return service.repo.AddProduct(product)
 }
 
 func (service Service) UpdateProduct(
-	id int,
+	id domain.ProductId,
 	product domain.Product,
 ) error {
 
@@ -75,7 +75,7 @@ func (service Service) UpdateProduct(
 }
 
 func (service Service) DeleteProduct(
-	id int,
+	id domain.ProductId,
 ) error {
 
 	return service.repo.DeleteProduct(id)
