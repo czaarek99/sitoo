@@ -109,7 +109,7 @@ func rowsToProducts(rows *sql.Rows) []domain.Product {
 		barcodeSlice := make([]string, 5)
 		attributeSlice := make([]domain.ProductAttribute, 5)
 
-		for key, _ := range value.barcodes {
+		for key := range value.barcodes {
 			barcodeSlice = append(barcodeSlice, key)
 		}
 
