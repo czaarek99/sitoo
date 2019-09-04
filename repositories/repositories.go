@@ -271,3 +271,11 @@ func (repo Repository) UpdateProduct(
 	return nil
 
 }
+
+func (repo Repository) DeleteProduct(
+	id domain.ProductId,
+) error {
+
+	return nil
+
+}
