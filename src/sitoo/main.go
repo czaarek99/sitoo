@@ -8,7 +8,7 @@ import (
 )
 
 type ErrorResponse struct {
-	ErrorText string
+	ErrorText string `json:"errorText"`
 }
 
 func handler(writer http.ResponseWriter, request *http.Request) {
