@@ -38,7 +38,14 @@ type ProductUpdateInput struct {
 }
 
 type ProductService interface {
-	GetProducts(start uint64, num uint64, sku string, barcode string, fields []string) ([]Product, error)
+	GetProducts(
+		start uint64,
+		num uint64,
+		sku string,
+		barcode string,
+		fields []string,
+	) ([]Product, error)
+
 	GetProduct(id ProductId, fields []string) (Product, error)
 	AddProduct(product ProductAddInput) (ProductId, error)
 	UpdateProduct(id ProductId, product ProductUpdateInput) error
@@ -46,7 +53,13 @@ type ProductService interface {
 }
 
 type ProductRepository interface {
-	GetProducts(start uint64, num uint64, sku string, barcode string) ([]Product, error)
+	GetProducts(
+		start uint64,
+		num uint64,
+		sku string,
+		barcode string,
+	) ([]Product, error)
+
 	GetProduct(id ProductId) (Product, error)
 	AddProduct(product ProductAddInput) (ProductId, error)
 	UpdateProduct(id ProductId, product ProductUpdateInput) error
