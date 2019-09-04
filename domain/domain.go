@@ -16,6 +16,7 @@ type Product struct {
 	Price       string
 	Created     uint32
 	LastUpdated uint32
+	Attributes  []ProductAttribute
 }
 
 type ProductService interface {
