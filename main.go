@@ -30,7 +30,7 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 
 	} else {
 		response = ErrorResponse{
-			ErrorText: "Route not found",
+			ErrorText: "Not found",
 		}
 	}
 
