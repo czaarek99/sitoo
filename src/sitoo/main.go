@@ -18,6 +18,16 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 
 	if strings.HasPrefix(request.URL.Path, "/api/products") {
 
+		if request.Method == "GET" {
+
+		} else if request.Method == "POST" {
+
+		} else if request.Method == "PUT" {
+
+		} else if request.Method == "DELETE" {
+
+		}
+
 	} else {
 		response = ErrorResponse{
 			ErrorText: "Route not found",
