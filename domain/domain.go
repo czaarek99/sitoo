@@ -2,6 +2,11 @@ package domain
 
 type ProductId = uint32
 
+type ProductAttribute struct {
+	Name  string
+	Value string
+}
+
 type Product struct {
 	ProductID   ProductId
 	Title       string
