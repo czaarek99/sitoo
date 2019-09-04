@@ -16,8 +16,8 @@ type Service struct {
 func (service Service) GetProducts(
 	start int,
 	num int,
-	sku int,
-	barcode int,
+	sku string,
+	barcode string,
 	fields []string,
 ) ([]domain.Product, error) {
 
