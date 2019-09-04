@@ -27,9 +27,9 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 	jsonBytes, err := json.Marshal(response)
 
 	if err == nil {
-		writer.WriteHeader(http.StatusInternalServerError)
-	} else {
 		writer.Write(jsonBytes)
+	} else {
+		writer.WriteHeader(http.StatusInternalServerError)
 	}
 
 }
