@@ -14,8 +14,8 @@ type Service struct {
 //TODO: Implement all validation
 
 func (service Service) GetProducts(
-	start int,
-	num int,
+	start uint64,
+	num uint64,
 	sku string,
 	barcode string,
 	fields []string,
