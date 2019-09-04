@@ -3,6 +3,7 @@ package repositories
 import (
 	"database/sql"
 	"sitoo/domain"
+	"strconv"
 	"strings"
 
 	sq "github.com/Masterminds/squirrel"
@@ -214,4 +215,51 @@ func (repo Repository) GetProduct(
 	products := rowsToProducts(rows)
 
 	return products[0], nil
+}
+
+//TODO: Figure out how to get errors from insert query
+func (repo Repository) AddProduct(
+	product domain.ProductAddInput,
+) (domain.ProductId, error) {
+
+	price, err := strconv.ParseFloat(product.Price, 32)
+
+	if err != nil {
+		return 0, err
+	}
+
+	insert := sq.Insert("products").
+		Columns(
+			"title",
+			"sku",
+			"description",
+			"price",
+		).
+		Values(product.Title, product.Sku, product.Description, price).
+		RunWith(repo.db)
+
+	var productID domain.ProductId
+	insert.QueryRow().Scan(&productID)
+
+	if len(product.Barcodes) > 0 {
+		barcodeInsert := sq.Insert("product_barcode").Columns("product_id", "barcode")
+
+		for _, barcode := range product.Barcodes {
+			barcodeInsert = barcodeInsert.Values(productID, barcode)
+		}
+
+		barcodeInsert.RunWith(repo.db)
+	}
+
+	if len(product.Attributes) > 0 {
+		attributeInsert := sq.Insert("product_attribute").Columns("product_id", "name", "value")
+
+		for _, attribute := range product.Attributes {
+			attributeInsert = attributeInsert.Values(productID, attribute.Name, attribute.Value)
+		}
+
+		attributeInsert.RunWith(repo.db)
+	}
+
+	return productID, nil
 }

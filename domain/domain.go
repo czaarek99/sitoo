@@ -19,10 +19,19 @@ type Product struct {
 	Attributes  []ProductAttribute
 }
 
+type ProductAddInput struct {
+	Title       string
+	Sku         string
+	Barcodes    []string
+	Description string
+	Price       string
+	Attributes  []ProductAttribute
+}
+
 type ProductService interface {
 	GetProducts(start uint64, num uint64, sku string, barcode string, fields []string) ([]Product, error)
 	GetProduct(id ProductId, fields []string) (Product, error)
-	AddProduct(product Product) (int, error)
+	AddProduct(product ProductAddInput) (ProductId, error)
 	UpdateProduct(id ProductId, product Product) error
 	DeleteProduct(id ProductId) error
 }
@@ -30,7 +39,7 @@ type ProductService interface {
 type ProductRepository interface {
 	GetProducts(start uint64, num uint64, sku string, barcode string) ([]Product, error)
 	GetProduct(id ProductId) (Product, error)
-	AddProduct(product Product) (ProductId, error)
+	AddProduct(product ProductAddInput) (ProductId, error)
 	UpdateProduct(id ProductId, product Product) error
 	DeleteProduct(id ProductId) error
 	SkuExists(sku string) (bool, error)
