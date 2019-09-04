@@ -49,55 +49,8 @@ func getAttributeHash(attribute domain.ProductAttribute) string {
 	return attributeHash.String()
 }
 
-/*
-Could be optimized to use 3 queries instead of one.
-That adds a lot of complexity to the problem so we'll
-skip that here.
-*/
-func (repo Repository) GetProducts(
-	start uint64,
-	num uint64,
-	sku string,
-	barcode string,
-) ([]domain.Product, error) {
-
-	query := sq.Select(
-		"product.product_id",
-		"product.title",
-		"product.sku",
-		"product.description",
-		"product.price",
-		"product.created",
-		"product.last_updated",
-		"product_barcode.barcode",
-		"product_attribute.name",
-		"product_attribute.value",
-	).
-		LeftJoin("product_barcode USING (product_id)").
-		LeftJoin("product_attribute USING (product_id)").
-		From("product").
-		Limit(num).
-		Offset(start)
-
-	if sku != "" {
-		query = query.Where(sq.Eq{
-			sku: sku,
-		})
-	}
-
-	if barcode != "" {
-		query = query.Where(sq.Eq{
-			barcode: barcode,
-		})
-	}
-
-	rows, err := query.RunWith(repo.db).Query()
-
+func rowsToProducts(rows *sql.Rows) []domain.Product {
 	defer rows.Close()
-
-	if err != nil {
-		return nil, err
-	}
 
 	productMap := make(map[domain.ProductId]DatabaseProduct)
 
@@ -177,5 +130,56 @@ func (repo Repository) GetProducts(
 		})
 	}
 
-	return results, nil
+	return results
+}
+
+/*
+Could be optimized to use 3 queries instead of one.
+That adds a lot of complexity to the problem so we'll
+skip that here.
+*/
+func (repo Repository) GetProducts(
+	start uint64,
+	num uint64,
+	sku string,
+	barcode string,
+) ([]domain.Product, error) {
+
+	query := sq.Select(
+		"product.product_id",
+		"product.title",
+		"product.sku",
+		"product.description",
+		"product.price",
+		"product.created",
+		"product.last_updated",
+		"product_barcode.barcode",
+		"product_attribute.name",
+		"product_attribute.value",
+	).
+		LeftJoin("product_barcode USING (product_id)").
+		LeftJoin("product_attribute USING (product_id)").
+		From("product").
+		Limit(num).
+		Offset(start)
+
+	if sku != "" {
+		query = query.Where(sq.Eq{
+			sku: sku,
+		})
+	}
+
+	if barcode != "" {
+		query = query.Where(sq.Eq{
+			barcode: barcode,
+		})
+	}
+
+	rows, err := query.RunWith(repo.db).Query()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return rowsToProducts(rows), nil
 }
