@@ -46,7 +46,7 @@ func (service Service) GetProduct(
 }
 
 func (service Service) AddProduct(
-	product domain.Product,
+	product domain.ProductAddInput,
 ) (domain.ProductId, error) {
 
 	log.Println("Adding product")
@@ -66,7 +66,7 @@ func (service Service) AddProduct(
 
 func (service Service) UpdateProduct(
 	id domain.ProductId,
-	product domain.Product,
+	product domain.ProductUpdateInput,
 ) error {
 
 	log.Println("Updating product")
