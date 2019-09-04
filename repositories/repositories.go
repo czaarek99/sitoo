@@ -1,7 +1,5 @@
 package repositories
 
-//When this is ready make sure to rebase this commit
-
 import (
 	"database/sql"
 	"sitoo/domain"
