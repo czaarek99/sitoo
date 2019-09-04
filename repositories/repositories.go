@@ -165,13 +165,13 @@ func (repo Repository) GetProducts(
 
 	if sku != "" {
 		query = query.Where(sq.Eq{
-			sku: sku,
+			"sku": sku,
 		})
 	}
 
 	if barcode != "" {
 		query = query.Where(sq.Eq{
-			barcode: barcode,
+			"barcode": barcode,
 		})
 	}
 
@@ -182,4 +182,38 @@ func (repo Repository) GetProducts(
 	}
 
 	return rowsToProducts(rows), nil
+}
+
+func (repo Repository) GetProduct(
+	id domain.ProductId,
+) (domain.Product, error) {
+
+	rows, err := sq.Select(
+		"product.product_id",
+		"product.title",
+		"product.sku",
+		"product.description",
+		"product.price",
+		"product.created",
+		"product.last_updated",
+		"product_barcode.barcode",
+		"product_attribute.name",
+		"product_attribute.value",
+	).
+		LeftJoin("product_barcode USING (product_id)").
+		LeftJoin("product_attribute USING (product_id)").
+		From("product").
+		Where(sq.Eq{
+			"product_id": id,
+		}).
+		RunWith(repo.db).
+		Query()
+
+	if err != nil {
+		return domain.Product{}, err
+	}
+
+	products := rowsToProducts(rows)
+
+	return products[0], nil
 }
