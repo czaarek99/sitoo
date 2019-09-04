@@ -263,3 +263,11 @@ func (repo Repository) AddProduct(
 
 	return productID, nil
 }
+
+func (repo Repository) UpdateProduct(
+	product domain.ProductUpdateInput,
+) error {
+
+	return nil
+
+}
