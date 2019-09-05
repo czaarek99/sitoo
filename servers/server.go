@@ -166,6 +166,8 @@ func (server Server) handlePOST(
 	decoder := json.NewDecoder(request.Body)
 	err := decoder.Decode(&product)
 
+	defer request.Body.Close()
+
 	if err != nil {
 		writeError(writer, getBadRequestResponse(err.Error()))
 		return
