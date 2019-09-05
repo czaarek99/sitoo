@@ -55,6 +55,16 @@ func getAttributeHash(attribute domain.ProductAttribute) string {
 	return attributeHash.String()
 }
 
+func convertSQLDateToTimestamp(date string) (int64, error) {
+	createdTime, err := time.Parse("2006-01-02 15:04:05", date)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return createdTime.Unix(), nil
+}
+
 //TODO: Refactor and just make 3 queries instead
 func rowsToProducts(rows *sql.Rows) ([]domain.Product, uint32, error) {
 	results := make([]domain.Product, 0)
@@ -99,22 +109,20 @@ func rowsToProducts(rows *sql.Rows) ([]domain.Product, uint32, error) {
 
 		fmt.Println(created)
 
-		createdTime, err := time.Parse("2006-01-02 15:04:05", created)
+		productEntity.Created, err = convertSQLDateToTimestamp(created)
 
-		productEntity.Created = createdTime.Unix()
+		if err != nil {
+			return nil, 0, err
+		}
 
 		if lastUpdated != nil {
-
-			lastUpdatedTime, err := time.Parse("2006-01-02 15:04:05", created)
+			lastUpdatedTime, err := convertSQLDateToTimestamp(*lastUpdated)
 
 			if err != nil {
 				return nil, 0, err
 			}
 
-			lastUpdatedEpoc := lastUpdatedTime.Unix()
-
-			productEntity.LastUpdated = &lastUpdatedEpoc
-
+			productEntity.LastUpdated = &lastUpdatedTime
 		}
 
 		if err != nil {
