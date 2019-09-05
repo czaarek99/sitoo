@@ -54,6 +54,7 @@ func getAttributeHash(attribute domain.ProductAttribute) string {
 	return attributeHash.String()
 }
 
+//TODO: Refactor and just make 3 queries instead
 func rowsToProducts(rows *sql.Rows) ([]domain.Product, uint32, error) {
 	results := make([]domain.Product, 0)
 
