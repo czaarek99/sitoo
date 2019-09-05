@@ -66,7 +66,7 @@ func getAttributeHash(attribute domain.ProductAttribute) string {
 }
 
 func rowsToProducts(rows *sql.Rows) ([]domain.Product, uint32, error) {
-	results := make([]domain.Product, 1)
+	results := make([]domain.Product, 0)
 
 	var rowCount uint32
 
