@@ -140,7 +140,7 @@ func (repo Repository) GetProducts(
 	num uint64,
 	sku string,
 	barcode string,
-	fields string,
+	fields []string,
 ) ([]domain.Product, uint32, error) {
 
 	query := sq.Select(
