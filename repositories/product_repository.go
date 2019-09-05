@@ -275,7 +275,6 @@ func (repo ProductRepositoryImpl) GetProduct(
 	return products[0], count > 0, err
 }
 
-//TODO: Figure out how to get errors from insert query
 func (repo ProductRepositoryImpl) AddProduct(
 	product domain.ProductAddInput,
 ) (domain.ProductId, error) {
