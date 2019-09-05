@@ -11,7 +11,7 @@ import (
 )
 
 type Repository struct {
-	db *sql.DB
+	DB *sql.DB
 }
 
 //TODO: Handle price string - float conversion?
@@ -113,7 +113,7 @@ func rowsToProducts(rows *sql.Rows) ([]domain.Product, uint32, error) {
 }
 
 func (repo Repository) getTotalCount() (uint32, error) {
-	rows, err := repo.db.Query("SELECT COUNT(*) as count FROM product")
+	rows, err := repo.DB.Query("SELECT COUNT(*) as count FROM product")
 
 	if err != nil {
 		return 0, err
@@ -174,7 +174,7 @@ func (repo Repository) GetProducts(
 		})
 	}
 
-	rows, err := query.RunWith(repo.db).Query()
+	rows, err := query.RunWith(repo.DB).Query()
 
 	if err != nil {
 		return nil, 0, err
@@ -219,7 +219,7 @@ func (repo Repository) GetProduct(
 			"product_id": id,
 		}).
 		OrderBy("product.product_id").
-		RunWith(repo.db).
+		RunWith(repo.DB).
 		Query()
 
 	if err != nil {
@@ -260,7 +260,7 @@ func (repo Repository) AddProduct(
 			"created",
 		).
 		Values(product.Title, product.Sku, description, price, time.Now()).
-		RunWith(repo.db)
+		RunWith(repo.DB)
 
 	var productID domain.ProductId
 	insert.QueryRow().Scan(&productID)
@@ -272,7 +272,7 @@ func (repo Repository) AddProduct(
 			barcodeInsert = barcodeInsert.Values(productID, barcode)
 		}
 
-		barcodeInsert.RunWith(repo.db)
+		barcodeInsert.RunWith(repo.DB)
 	}
 
 	if len(product.Attributes) > 0 {
@@ -282,7 +282,7 @@ func (repo Repository) AddProduct(
 			attributeInsert = attributeInsert.Values(productID, attribute.Name, attribute.Value)
 		}
 
-		attributeInsert.RunWith(repo.db)
+		attributeInsert.RunWith(repo.DB)
 	}
 
 	return productID, nil
@@ -316,14 +316,14 @@ func (repo Repository) UpdateProduct(
 		query = query.Set(key, value)
 	}
 
-	_, err := query.RunWith(repo.db).Query()
+	_, err := query.RunWith(repo.DB).Query()
 
 	if err != nil {
 		return err
 	}
 
 	if len(product.Barcodes) > 0 {
-		_, err = sq.Delete("product_barcode").Where("product_id", id).RunWith(repo.db).Query()
+		_, err = sq.Delete("product_barcode").Where("product_id", id).RunWith(repo.DB).Query()
 
 		if err != nil {
 			return err
@@ -335,7 +335,7 @@ func (repo Repository) UpdateProduct(
 			barcodeInsert = barcodeInsert.Values(id, barcode)
 		}
 
-		_, err = barcodeInsert.RunWith(repo.db).Query()
+		_, err = barcodeInsert.RunWith(repo.DB).Query()
 
 		if err != nil {
 			return err
@@ -343,7 +343,7 @@ func (repo Repository) UpdateProduct(
 	}
 
 	if len(product.Attributes) > 0 {
-		_, err = sq.Delete("product_attribute").Where("product_id", id).RunWith(repo.db).Query()
+		_, err = sq.Delete("product_attribute").Where("product_id", id).RunWith(repo.DB).Query()
 
 		if err != nil {
 			return err
@@ -355,7 +355,7 @@ func (repo Repository) UpdateProduct(
 			attribtueInsert = attribtueInsert.Values(id, attribute.Name, attribute.Value)
 		}
 
-		_, err := attribtueInsert.RunWith(repo.db).Query()
+		_, err := attribtueInsert.RunWith(repo.DB).Query()
 
 		if err != nil {
 			return err
@@ -368,19 +368,19 @@ func (repo Repository) UpdateProduct(
 func (repo Repository) DeleteProduct(
 	id domain.ProductId,
 ) error {
-	_, err := sq.Delete("product").Where("product_id", id).RunWith(repo.db).Query()
+	_, err := sq.Delete("product").Where("product_id", id).RunWith(repo.DB).Query()
 
 	if err != nil {
 		return err
 	}
 
-	_, err = sq.Delete("product_barcode").Where("product_id", id).RunWith(repo.db).Query()
+	_, err = sq.Delete("product_barcode").Where("product_id", id).RunWith(repo.DB).Query()
 
 	if err != nil {
 		return err
 	}
 
-	_, err = sq.Delete("product_attribute").Where("product_id", id).RunWith(repo.db).Query()
+	_, err = sq.Delete("product_attribute").Where("product_id", id).RunWith(repo.DB).Query()
 
 	return err
 }
@@ -389,7 +389,7 @@ func (repo Repository) ProductExists(
 	id domain.ProductId,
 ) (bool, error) {
 
-	rows, err := repo.db.Query("SELECT COUNT(*) as count FROM product WHERE product_id = ?", id)
+	rows, err := repo.DB.Query("SELECT COUNT(*) as count FROM product WHERE product_id = ?", id)
 
 	if err != nil {
 		return false, err
