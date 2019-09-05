@@ -197,6 +197,7 @@ func (repo Repository) GetProduct(
 		Where(sq.Eq{
 			"product_id": id,
 		}).
+		OrderBy("product.product_id").
 		RunWith(repo.db).
 		Query()
 
