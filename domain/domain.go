@@ -73,12 +73,13 @@ type ProductRepository interface {
 
 type ErrorResponse struct {
 	ErrorText    string `json:"errorText"`
-	responseCode int
+	ResponseCode int
 }
 
 type ProductServer interface {
-	HandleGET(request *http.Request) (interface{}, ErrorResponse)
+	HandleRequest(writer http.ResponseWriter, request *http.Request)
+	/*HandleGET(request *http.Request) (interface{}, ErrorResponse)
 	HandlePOST(request *http.Request) (uint32, ErrorResponse)
 	HandlePUT(request *http.Request) (bool, ErrorResponse)
-	HandleDELETE(request *http.Request) (bool, ErrorResponse)
+	HandleDELETE(request *http.Request) (bool, ErrorResponse)*/
 }
