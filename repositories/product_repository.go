@@ -269,7 +269,7 @@ func (repo ProductRepositoryImpl) AddProduct(
 		}
 	}
 
-	rows, err := sq.Insert("product").
+	query, args, err := sq.Insert("product").
 		Columns(
 			"title",
 			"sku",
@@ -278,17 +278,21 @@ func (repo ProductRepositoryImpl) AddProduct(
 			"created",
 		).
 		Values(product.Title, product.Sku, description, price, time.Now()).
-		RunWith(repo.DB).
-		Query()
+		ToSql()
 
 	if err != nil {
 		return 0, err
 	}
 
-	var productID domain.ProductId
+	res, err := repo.DB.Exec(query, args...)
 
-	rows.Next()
-	rows.Scan(&productID)
+	if err != nil {
+		return 0, err
+	}
+
+	id, _ := res.LastInsertId()
+
+	var productID = domain.ProductId(id)
 
 	if len(product.Barcodes) > 0 {
 		barcodeInsert := sq.Insert("product_barcode").Columns("product_id", "barcode")
@@ -297,7 +301,11 @@ func (repo ProductRepositoryImpl) AddProduct(
 			barcodeInsert = barcodeInsert.Values(productID, barcode)
 		}
 
-		barcodeInsert.RunWith(repo.DB)
+		_, err := barcodeInsert.RunWith(repo.DB).Query()
+
+		if err != nil {
+			return 0, err
+		}
 	}
 
 	if len(product.Attributes) > 0 {
@@ -307,7 +315,11 @@ func (repo ProductRepositoryImpl) AddProduct(
 			attributeInsert = attributeInsert.Values(productID, attribute.Name, attribute.Value)
 		}
 
-		attributeInsert.RunWith(repo.DB)
+		_, err := attributeInsert.RunWith(repo.DB).Query()
+
+		if err != nil {
+			return 0, err
+		}
 	}
 
 	return productID, nil
