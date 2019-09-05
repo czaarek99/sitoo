@@ -22,21 +22,21 @@ type Product struct {
 }
 
 type ProductAddInput struct {
-	Title       string
-	Sku         string
-	Barcodes    []string
-	Description *string
-	Price       string
-	Attributes  []ProductAttribute
+	Title       string             `json:"productId"`
+	Sku         string             `json:"sku"`
+	Barcodes    []string           `json:"barcodes"`
+	Description *string            `json:"description"`
+	Price       string             `json:"price"`
+	Attributes  []ProductAttribute `json:"attributes"`
 }
 
 type ProductUpdateInput struct {
-	Title       *string
-	Sku         *string
-	Barcodes    []string
-	Description *string
-	Price       *string
-	Attributes  []ProductAttribute
+	Title       *string            `json:"productId"`
+	Sku         *string            `json:"sku"`
+	Barcodes    []string           `json:"barcodes"`
+	Description *string            `json:"description"`
+	Price       *string            `json:"price"`
+	Attributes  []ProductAttribute `json:"attributes"`
 }
 
 type ProductService interface {
