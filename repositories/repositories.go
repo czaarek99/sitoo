@@ -14,6 +14,10 @@ type Repository struct {
 	db *sql.DB
 }
 
+//TODO: Handle price string - float conversion?
+//TODO: Handle update/insert in transactions
+//TODO: Log database errors and don't expose them
+
 func getAttributeHash(attribute domain.ProductAttribute) string {
 	attributeHash := strings.Builder{}
 	attributeHash.WriteString(attribute.Name)
@@ -243,13 +247,81 @@ func (repo Repository) AddProduct(
 	return productID, nil
 }
 
+//TODO: Explain why we ignore a sku of nil later
 func (repo Repository) UpdateProduct(
 	id domain.ProductId,
 	product domain.ProductUpdateInput,
 ) error {
+	query := sq.Update("product").Where("product_id", id)
+
+	changes := make(map[string]interface{})
+	if product.Title != nil {
+		changes["title"] = product.Title
+	}
+
+	if product.Sku != nil {
+		changes["sku"] = product.Sku
+	}
+
+	if product.Description != nil {
+		changes["description"] = product.Description
+	}
+
+	if product.Price != nil {
+		changes["price"] = product.Price
+	}
+
+	for key, value := range changes {
+		query = query.Set(key, value)
+	}
+
+	_, err := query.RunWith(repo.db).Query()
+
+	if err != nil {
+		return err
+	}
+
+	if len(product.Barcodes) > 0 {
+		_, err = sq.Delete("product_barcode").Where("product_id", id).RunWith(repo.db).Query()
+
+		if err != nil {
+			return err
+		}
+
+		barcodeInsert := sq.Insert("product_barcode").Columns("product_id", "barcode")
+
+		for _, barcode := range product.Barcodes {
+			barcodeInsert = barcodeInsert.Values(id, barcode)
+		}
+
+		_, err = barcodeInsert.RunWith(repo.db).Query()
+
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(product.Attributes) > 0 {
+		_, err = sq.Delete("product_attribute").Where("product_id", id).RunWith(repo.db).Query()
+
+		if err != nil {
+			return err
+		}
+
+		attribtueInsert := sq.Insert("product_attribute").Columns("product_id", "name", "value")
+
+		for _, attribute := range product.Attributes {
+			attribtueInsert = attribtueInsert.Values(id, attribute.Name, attribute.Value)
+		}
+
+		_, err := attribtueInsert.RunWith(repo.db).Query()
+
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
-
 }
 
 func (repo Repository) DeleteProduct(

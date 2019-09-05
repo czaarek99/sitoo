@@ -31,10 +31,10 @@ type ProductAddInput struct {
 type ProductUpdateInput struct {
 	Title       *string
 	Sku         *string
-	Barcodes    *[]string
+	Barcodes    []string
 	Description *string
 	Price       *string
-	Attributes  *[]ProductAttribute
+	Attributes  []ProductAttribute
 }
 
 type ProductService interface {
