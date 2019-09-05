@@ -23,7 +23,7 @@ func (service Service) GetProducts(
 
 	log.Println("Requesting multiple products")
 
-	return service.repo.GetProducts(start, num, sku, barcode)
+	return service.repo.GetProducts(start, num, sku, barcode, fields)
 }
 
 func (service Service) GetProduct(
@@ -33,7 +33,7 @@ func (service Service) GetProduct(
 
 	log.Println("Requesting single product")
 
-	product, err := service.repo.GetProduct(id)
+	product, err := service.repo.GetProduct(id, fields)
 
 	if err != nil {
 		return product, err

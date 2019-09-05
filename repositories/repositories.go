@@ -114,6 +114,7 @@ func (repo Repository) GetProducts(
 	num uint64,
 	sku string,
 	barcode string,
+	fields string,
 ) ([]domain.Product, error) {
 
 	query := sq.Select(
@@ -158,6 +159,7 @@ func (repo Repository) GetProducts(
 
 func (repo Repository) GetProduct(
 	id domain.ProductId,
+	fields []string,
 ) (domain.Product, error) {
 
 	rows, err := sq.Select(

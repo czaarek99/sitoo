@@ -58,9 +58,10 @@ type ProductRepository interface {
 		num uint64,
 		sku string,
 		barcode string,
+		fields []string,
 	) ([]Product, error)
 
-	GetProduct(id ProductId) (Product, error)
+	GetProduct(id ProductId, fields []string) (Product, error)
 	AddProduct(product ProductAddInput) (ProductId, error)
 	UpdateProduct(id ProductId, product ProductUpdateInput) error
 	DeleteProduct(id ProductId) error
