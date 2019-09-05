@@ -459,6 +459,8 @@ func (repo ProductRepositoryImpl) DeleteProduct(
 		return err
 	}
 
+	tx.Commit()
+
 	return nil
 }
 
