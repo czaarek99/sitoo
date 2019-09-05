@@ -12,6 +12,7 @@ type Service struct {
 }
 
 //TODO: Implement all validation
+//Catch database errors and print to console instead
 
 func (service Service) GetProducts(
 	start uint64,
