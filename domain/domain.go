@@ -73,7 +73,7 @@ type ProductRepository interface {
 
 type ErrorResponse struct {
 	ErrorText    string `json:"errorText"`
-	ResponseCode int
+	ResponseCode int    `json:"-"`
 }
 
 type ProductServer interface {
