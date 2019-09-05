@@ -20,23 +20,8 @@ type ProductRepositoryImpl struct {
 //TODO: Handle fields in database
 
 func (repo ProductRepositoryImpl) getTotalCount() (uint32, error) {
-	rows, err := repo.DB.Query("SELECT COUNT(*) as count FROM product")
-
-	defer rows.Close()
-
-	if err != nil {
-		return 0, err
-	}
-
-	var count uint32
-
-	err = rows.Scan(&count)
-
-	if err != nil {
-		return 0, err
-	}
-
-	return count, nil
+	count, err := repo.count("SELECT COUNT(*) as count FROM product")
+	return count, err
 }
 
 func (repo ProductRepositoryImpl) count(
@@ -44,14 +29,24 @@ func (repo ProductRepositoryImpl) count(
 	values ...interface{},
 ) (uint32, error) {
 
-	rows, err := repo.DB.Query(query, values)
+	var rows *sql.Rows
+	var err error
+
+	if len(values) > 0 {
+		rows, err = repo.DB.Query(query, values)
+	} else {
+		rows, err = repo.DB.Query(query)
+	}
+
 	defer rows.Close()
+
 	if err != nil {
 		return 0, err
 	}
 
 	var count uint32
 
+	rows.Next()
 	err = rows.Scan(&count)
 
 	if err != nil {
