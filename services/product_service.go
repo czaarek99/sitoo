@@ -20,8 +20,6 @@ func handleDatabaseError(err error) {
 	log.Println(err.Error())
 }
 
-//Catch database errors and print to console instead
-
 func (service ProductServiceImpl) GetProducts(
 	start uint64,
 	num uint64,
