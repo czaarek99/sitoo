@@ -10,14 +10,14 @@ type ProductAttribute struct {
 }
 
 type Product struct {
-	ProductID   ProductId `json: "productId"`
-	Title       string    `json: "title"`
-	Sku         string    `json: "sku"`
+	ProductID   ProductId `json:"productId"`
+	Title       string    `json:"title"`
+	Sku         string    `json:"sku"`
 	Barcodes    []string
-	Description *string `json: "description"`
-	Price       string  `json: "price"`
-	Created     uint32  `json: "created`
-	LastUpdated *uint32 `json: "lastUpdated"`
+	Description *string `json:"description"`
+	Price       string  `json:"price"`
+	Created     uint32  `json:"created`
+	LastUpdated *uint32 `json:"lastUpdated"`
 	Attributes  []ProductAttribute
 }
 
