@@ -269,7 +269,7 @@ func (repo ProductRepositoryImpl) AddProduct(
 		}
 	}
 
-	rows, err := sq.Insert("products").
+	rows, err := sq.Insert("product").
 		Columns(
 			"title",
 			"sku",
