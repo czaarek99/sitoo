@@ -160,7 +160,8 @@ func (repo Repository) GetProducts(
 		LeftJoin("product_attribute USING (product_id)").
 		From("product").
 		Limit(num).
-		Offset(start)
+		Offset(start).
+		OrderBy("product.product_id")
 
 	if sku != "" {
 		query = query.Where(sq.Eq{
