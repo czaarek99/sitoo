@@ -22,7 +22,7 @@ type Product struct {
 }
 
 type ProductAddInput struct {
-	Title       string             `json:"productId"`
+	Title       string             `json:"title"`
 	Sku         string             `json:"sku"`
 	Barcodes    []string           `json:"barcodes"`
 	Description *string            `json:"description"`
@@ -31,7 +31,7 @@ type ProductAddInput struct {
 }
 
 type ProductUpdateInput struct {
-	Title       *string            `json:"productId"`
+	Title       *string            `json:"title"`
 	Sku         *string            `json:"sku"`
 	Barcodes    []string           `json:"barcodes"`
 	Description *string            `json:"description"`
