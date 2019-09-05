@@ -363,16 +363,24 @@ func (repo ProductRepositoryImpl) UpdateProduct(
 		query.Set("price", product.Price)
 	}
 
-	_, err := query.RunWith(repo.DB).Query()
+	tx, err := repo.DB.Begin()
 
 	if err != nil {
 		return err
 	}
 
+	_, err = query.RunWith(tx).Query()
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	if len(product.Barcodes) > 0 {
-		_, err = sq.Delete("product_barcode").Where("product_id", id).RunWith(repo.DB).Query()
+		_, err = sq.Delete("product_barcode").Where("product_id", id).RunWith(tx).Query()
 
 		if err != nil {
+			tx.Rollback()
 			return err
 		}
 
@@ -382,9 +390,10 @@ func (repo ProductRepositoryImpl) UpdateProduct(
 			barcodeInsert = barcodeInsert.Values(id, barcode)
 		}
 
-		_, err = barcodeInsert.RunWith(repo.DB).Query()
+		_, err = barcodeInsert.RunWith(tx).Query()
 
 		if err != nil {
+			tx.Rollback()
 			return err
 		}
 	}
@@ -393,6 +402,7 @@ func (repo ProductRepositoryImpl) UpdateProduct(
 		_, err = sq.Delete("product_attribute").Where("product_id", id).RunWith(repo.DB).Query()
 
 		if err != nil {
+			tx.Rollback()
 			return err
 		}
 
@@ -405,11 +415,12 @@ func (repo ProductRepositoryImpl) UpdateProduct(
 		_, err := attribtueInsert.RunWith(repo.DB).Query()
 
 		if err != nil {
+			tx.Rollback()
 			return err
 		}
 	}
 
-	return nil
+	return tx.Commit()
 }
 
 func (repo ProductRepositoryImpl) DeleteProduct(
