@@ -195,6 +195,15 @@ func (repo Repository) AddProduct(
 		return 0, err
 	}
 
+	var description sql.NullString
+
+	if product.Description != nil {
+		description = sql.NullString{
+			String: *product.Description,
+			Valid:  true,
+		}
+	}
+
 	insert := sq.Insert("products").
 		Columns(
 			"title",
@@ -202,7 +211,7 @@ func (repo Repository) AddProduct(
 			"description",
 			"price",
 		).
-		Values(product.Title, product.Sku, product.Description, price).
+		Values(product.Title, product.Sku, description, price).
 		RunWith(repo.db)
 
 	var productID domain.ProductId

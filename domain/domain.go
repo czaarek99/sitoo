@@ -23,7 +23,7 @@ type ProductAddInput struct {
 	Title       string
 	Sku         string
 	Barcodes    []string
-	Description string
+	Description *string
 	Price       string
 	Attributes  []ProductAttribute
 }
