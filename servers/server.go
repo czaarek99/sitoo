@@ -65,23 +65,26 @@ func parseGET(request *http.Request) parsedGET {
 		parsed.getType = singleGET
 	} else {
 		query := request.URL.Query()
-
-		start, err := strconv.ParseUint(query["start"][0], 10, 64)
+		start, err := strconv.ParseUint(query.Get("start"), 10, 64)
 
 		if err != nil {
 			parsed.start = start
 		}
 
-		num, numErr := strconv.ParseUint(query["num"][0], 10, 64)
+		num, numErr := strconv.ParseUint(query.Get("num"), 10, 64)
 
 		if numErr != nil {
 			parsed.num = num
 		}
 
-		parsed.sku = query["sku"][0]
-		parsed.barcode = query["barcode"][0]
-		parsed.fields = strings.Split(query["fields"][0], ",")
+		delimitedFields := query.Get("fields")
 
+		if delimitedFields != "" {
+			parsed.fields = strings.Split(delimitedFields, ",")
+		}
+
+		parsed.sku = query.Get("sku")
+		parsed.barcode = query.Get("barcode")
 		parsed.getType = multipleGET
 	}
 
