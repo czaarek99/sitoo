@@ -73,6 +73,16 @@ func (service Service) UpdateProduct(
 	product domain.ProductUpdateInput,
 ) error {
 
+	exists, err := service.repo.ProductExists(id)
+
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return errors.New(fmt.Sprintf("Can't find product %v", id))
+	}
+
 	log.Println("Updating product")
 
 	return service.repo.UpdateProduct(id, product)
