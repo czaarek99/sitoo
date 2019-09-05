@@ -29,6 +29,11 @@ type parsedGET struct {
 	fields  []string
 }
 
+type MultipleGetResponse struct {
+	TotalCount uint32 `json:"totalCount"`
+	Items      []domain.Product
+}
+
 func getBadRequestResponse(text string) domain.ErrorResponse {
 	return domain.ErrorResponse{
 		ErrorText:    text,
@@ -80,11 +85,6 @@ func parseGET(request *http.Request) parsedGET {
 	}
 
 	return parsed
-}
-
-type MultipleGetResponse struct {
-	TotalCount uint32 `json:"totalCount"`
-	Items      []domain.Product
 }
 
 func (server Server) handleGET(
