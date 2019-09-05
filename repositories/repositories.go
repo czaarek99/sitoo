@@ -422,3 +422,16 @@ func (repo Repository) ProductExists(
 
 	return count > 0, nil
 }
+
+func (repo Repository) SkuExists(
+	sku string,
+) (bool, error) {
+
+	count, err := repo.count("SELECT COUNT(*) as count FROM product WHERE sku = ?", sku)
+
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
