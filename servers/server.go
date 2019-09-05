@@ -66,6 +66,16 @@ func writeJson(
 	}
 }
 
+func getProductIdFromPath(
+	requestPath string,
+) (domain.ProductId, error) {
+	base := path.Base(requestPath)
+
+	id, err := strconv.ParseUint(base, 10, 32)
+
+	return domain.ProductId(id), err
+}
+
 //Assumes properly formatted GET
 //Too much time to write a parser
 //Could use a library but this show i know more right?
@@ -73,9 +83,7 @@ func parseGET(request *http.Request) parsedGET {
 
 	parsed := parsedGET{}
 
-	base := path.Base(request.URL.Path)
-
-	productID, err := strconv.ParseUint(base, 10, 32)
+	productID, err := getProductIdFromPath(request.URL.Path)
 
 	if err == nil {
 		parsed.productID = domain.ProductId(productID)
