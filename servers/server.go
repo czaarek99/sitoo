@@ -195,6 +195,7 @@ func (server Server) handlePUT(
 
 	if err != nil {
 		writeError(writer, getBadRequestResponse("Bad Request"))
+		return
 	}
 
 	var changes domain.ProductUpdateInput
@@ -224,6 +225,23 @@ func (server Server) handleDELETE(
 	writer http.ResponseWriter,
 	request *http.Request,
 ) {
+
+	id, err := getProductIdFromPath(request.URL.Path)
+
+	if err != nil {
+		writeError(writer, getBadRequestResponse("Bad Request"))
+		return
+	}
+
+	err = server.Service.DeleteProduct(id)
+
+	if err != nil {
+		writeError(writer, getBadRequestResponse(err.Error()))
+		return
+	}
+
+	writer.WriteHeader(http.StatusOK)
+	writer.Write([]byte("true"))
 
 }
 
