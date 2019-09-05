@@ -249,6 +249,10 @@ func (repo ProductRepositoryImpl) GetProduct(
 
 	products, count, err := rowsToProducts(rows)
 
+	if len(products) == 0 {
+		return domain.Product{}, false, nil
+	}
+
 	return products[0], count > 0, err
 }
 
