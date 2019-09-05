@@ -13,32 +13,6 @@ type Repository struct {
 	db *sql.DB
 }
 
-type DatabaseRow struct {
-	productID      domain.ProductId
-	title          string
-	sku            string
-	description    string
-	price          string
-	created        uint32
-	lastUpdated    uint32
-	barcode        string
-	attributeName  string
-	attributeValue string
-}
-
-type DatabaseProduct struct {
-	productID   domain.ProductId
-	title       string
-	sku         string
-	description string
-	price       string
-	created     uint32
-	lastUpdated uint32
-
-	barcodes   map[string]struct{}
-	attributes map[string]domain.ProductAttribute
-}
-
 func getAttributeHash(attribute domain.ProductAttribute) string {
 	attributeHash := strings.Builder{}
 	attributeHash.WriteString(attribute.Name)
