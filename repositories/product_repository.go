@@ -29,14 +29,7 @@ func (repo ProductRepositoryImpl) count(
 	values ...interface{},
 ) (uint32, error) {
 
-	var rows *sql.Rows
-	var err error
-
-	if len(values) > 0 {
-		rows, err = repo.DB.Query(query, values)
-	} else {
-		rows, err = repo.DB.Query(query)
-	}
+	rows, err := repo.DB.Query(query, values...)
 
 	defer rows.Close()
 
@@ -276,7 +269,7 @@ func (repo ProductRepositoryImpl) AddProduct(
 		}
 	}
 
-	insert := sq.Insert("products").
+	rows, err := sq.Insert("products").
 		Columns(
 			"title",
 			"sku",
@@ -285,10 +278,17 @@ func (repo ProductRepositoryImpl) AddProduct(
 			"created",
 		).
 		Values(product.Title, product.Sku, description, price, time.Now()).
-		RunWith(repo.DB)
+		RunWith(repo.DB).
+		Query()
+
+	if err != nil {
+		return 0, err
+	}
 
 	var productID domain.ProductId
-	insert.QueryRow().Scan(&productID)
+
+	rows.Next()
+	rows.Scan(&productID)
 
 	if len(product.Barcodes) > 0 {
 		barcodeInsert := sq.Insert("product_barcode").Columns("product_id", "barcode")
