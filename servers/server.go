@@ -129,7 +129,23 @@ func (server Server) handlePOST(
 	request *http.Request,
 ) (uint32, domain.ErrorResponse) {
 
-	return 0, domain.ErrorResponse{}
+	var product domain.ProductAddInput
+
+	decoder := json.NewDecoder(request.Body)
+	err := decoder.Decode(&product)
+
+	if err != nil {
+		return 0, getBadRequestResponse(err.Error())
+	}
+
+	var id domain.ProductId
+	id, err = server.Service.AddProduct(product)
+
+	if err != nil {
+		return 0, getBadRequestResponse(err.Error())
+	}
+
+	return id, domain.ErrorResponse{}
 }
 
 func (server Server) handlePUT(
