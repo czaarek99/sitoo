@@ -293,7 +293,7 @@ func (repo Repository) UpdateProduct(
 	id domain.ProductId,
 	product domain.ProductUpdateInput,
 ) error {
-	query := sq.Update("product").Where("product_id", id)
+	query := sq.Update("product").Where("product_id", id).Set("last_updated", time.Now())
 
 	if product.Title != nil {
 		query.Set("title", product.Title)
