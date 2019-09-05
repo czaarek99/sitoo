@@ -11,6 +11,8 @@ type ProductServiceImpl struct {
 	Repo domain.ProductRepository
 }
 
+//TODO: Throw error on non unique barcode
+
 func getGenericDatabaseError() error {
 	return errors.New("Database error")
 }

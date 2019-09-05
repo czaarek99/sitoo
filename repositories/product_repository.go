@@ -14,11 +14,7 @@ type ProductRepositoryImpl struct {
 	DB *sql.DB
 }
 
-//TODO: Handle price string - float conversion?
-//TODO: Handle update/insert in transactions
-//TODO: Log database errors and don't expose them
 //TODO: Handle fields in database
-
 func (repo ProductRepositoryImpl) getTotalCount() (uint32, error) {
 	count, err := repo.count("SELECT COUNT(*) as count FROM product")
 	return count, err
