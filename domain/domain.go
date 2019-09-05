@@ -61,7 +61,7 @@ type ProductRepository interface {
 		fields []string,
 	) ([]Product, uint32, error)
 
-	GetProduct(id ProductId, fields []string) (Product, error)
+	GetProduct(id ProductId, fields []string) (Product, bool, error)
 	AddProduct(product ProductAddInput) (ProductId, error)
 	UpdateProduct(id ProductId, product ProductUpdateInput) error
 	DeleteProduct(id ProductId) error

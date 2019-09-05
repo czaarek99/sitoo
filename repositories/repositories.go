@@ -28,10 +28,12 @@ func getAttributeHash(attribute domain.ProductAttribute) string {
 	return attributeHash.String()
 }
 
-func rowsToProducts(rows *sql.Rows) []domain.Product {
+func rowsToProducts(rows *sql.Rows) ([]domain.Product, uint32, error) {
 	defer rows.Close()
 
 	results := make([]domain.Product, 1)
+
+	var rowCount uint32
 
 	first := true
 	barcodes := make(map[string]struct{})
@@ -41,13 +43,15 @@ func rowsToProducts(rows *sql.Rows) []domain.Product {
 	var prevId uint32
 
 	for rows.Next() {
+		rowCount++
+
 		productEntity := domain.Product{}
 
 		var barcode string
 		var attributeName string
 		var attributeValue string
 
-		rows.Scan(
+		err := rows.Scan(
 			&productEntity.ProductID,
 			&productEntity.Title,
 			&productEntity.Sku,
@@ -59,6 +63,10 @@ func rowsToProducts(rows *sql.Rows) []domain.Product {
 			&attributeName,
 			&attributeValue,
 		)
+
+		if err != nil {
+			return nil, 0, err
+		}
 
 		isNewId := prevId != productEntity.ProductID
 
@@ -101,7 +109,7 @@ func rowsToProducts(rows *sql.Rows) []domain.Product {
 		prevId = productEntity.ProductID
 	}
 
-	return results
+	return results, rowCount, nil
 }
 
 func (repo Repository) getTotalCount() (uint32, error) {
@@ -172,7 +180,7 @@ func (repo Repository) GetProducts(
 		return nil, 0, err
 	}
 
-	products, err := rowsToProducts(rows), nil
+	products, _, err := rowsToProducts(rows)
 
 	if err != nil {
 		return nil, 0, err
@@ -190,7 +198,7 @@ func (repo Repository) GetProducts(
 func (repo Repository) GetProduct(
 	id domain.ProductId,
 	fields []string,
-) (domain.Product, error) {
+) (domain.Product, bool, error) {
 
 	rows, err := sq.Select(
 		"product.product_id",
@@ -215,12 +223,12 @@ func (repo Repository) GetProduct(
 		Query()
 
 	if err != nil {
-		return domain.Product{}, err
+		return domain.Product{}, false, err
 	}
 
-	products := rowsToProducts(rows)
+	products, count, err := rowsToProducts(rows)
 
-	return products[0], nil
+	return products[0], count > 0, err
 }
 
 //TODO: Figure out how to get errors from insert query

@@ -37,16 +37,16 @@ func (service Service) GetProduct(
 
 	log.Println("Requesting single product")
 
-	product, err := service.repo.GetProduct(id, fields)
+	product, exists, err := service.repo.GetProduct(id, fields)
 
 	if err != nil {
 		return product, err
-	} else {
+	} else if !exists {
 		newErr := errors.New(fmt.Sprintf("Can't find product %v", id))
-
 		return product, newErr
 	}
 
+	return product, nil
 }
 
 func (service Service) AddProduct(
