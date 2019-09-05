@@ -2,6 +2,7 @@ package servers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"path"
 	"sitoo/domain"
@@ -147,23 +148,32 @@ func (server Server) HandleRequest(
 	request *http.Request,
 ) {
 
-	writer.Header().Set("Content-Type", "application/json")
-
 	var errorResponse domain.ErrorResponse
-	var successResponse interface{}
+	var jsonResponse interface{}
+	var stringResponse string
 
 	path := request.URL.Path
 
 	if strings.HasPrefix(path, "/api/products") {
 
 		if request.Method == "GET" {
-			successResponse, errorResponse = server.handleGET(request)
+			jsonResponse, errorResponse = server.handleGET(request)
 		} else if request.Method == "POST" {
-			successResponse, errorResponse = server.handlePOST(request)
+			productID, err := server.handlePOST(request)
+
+			errorResponse = err
+			stringResponse = strconv.FormatUint(uint64(productID), 10)
 		} else if request.Method == "PUT" {
-			successResponse, errorResponse = server.handlePUT(request)
+			success, err := server.handlePUT(request)
+
+			errorResponse = err
+			stringResponse = strconv.FormatBool(success)
 		} else if request.Method == "DELETE" {
-			successResponse, errorResponse = server.handleDELETE(request)
+			success, err := server.handleDELETE(request)
+
+			errorResponse = err
+			stringResponse = strconv.FormatBool(success)
+
 		} else {
 			errorResponse = getNotFoundResponse()
 		}
@@ -172,21 +182,28 @@ func (server Server) HandleRequest(
 		errorResponse = getNotFoundResponse()
 	}
 
-	var err error
-	var jsonBytes []byte
-
-	if errorResponse.ResponseCode != 0 {
-		jsonBytes, err = json.Marshal(errorResponse)
-		writer.WriteHeader(errorResponse.ResponseCode)
-	} else {
-		jsonBytes, err = json.Marshal(successResponse)
-	}
-
-	if err == nil {
+	if stringResponse != "" {
+		fmt.Fprint(writer, stringResponse)
 		writer.WriteHeader(http.StatusOK)
-		writer.Write(jsonBytes)
 	} else {
-		writer.WriteHeader(http.StatusInternalServerError)
-	}
+		writer.Header().Set("Content-Type", "application/json")
 
+		var jsonBytes []byte
+		var err error
+
+		if errorResponse.ResponseCode == 0 {
+			writer.WriteHeader(http.StatusOK)
+
+			jsonBytes, err = json.Marshal(jsonResponse)
+		} else {
+			jsonBytes, err = json.Marshal(errorResponse)
+		}
+
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+		} else {
+			writer.WriteHeader(errorResponse.ResponseCode)
+			writer.Write(jsonBytes)
+		}
+	}
 }
