@@ -345,22 +345,27 @@ func (repo ProductRepositoryImpl) UpdateProduct(
 	id domain.ProductId,
 	product domain.ProductUpdateInput,
 ) error {
-	query := sq.Update("product").Where("product_id", id).Set("last_updated", time.Now())
+
+	predicate := sq.Eq{
+		"product_id": id,
+	}
+
+	query := sq.Update("product").Set("last_updated", time.Now()).Where(predicate)
 
 	if product.Title != nil {
-		query.Set("title", product.Title)
+		query = query.Set("title", product.Title)
 	}
 
 	if product.Sku != nil {
-		query.Set("sku", product.Sku)
+		query = query.Set("sku", product.Sku)
 	}
 
 	if product.Description != nil {
-		query.Set("description", product.Description)
+		query = query.Set("description", product.Description)
 	}
 
 	if product.Price != nil {
-		query.Set("price", product.Price)
+		query = query.Set("price", product.Price)
 	}
 
 	tx, err := repo.DB.Begin()
@@ -377,7 +382,7 @@ func (repo ProductRepositoryImpl) UpdateProduct(
 	}
 
 	if len(product.Barcodes) > 0 {
-		_, err = sq.Delete("product_barcode").Where("product_id", id).RunWith(tx).Query()
+		_, err = sq.Delete("product_barcode").Where(predicate).RunWith(tx).Query()
 
 		if err != nil {
 			tx.Rollback()
@@ -399,7 +404,7 @@ func (repo ProductRepositoryImpl) UpdateProduct(
 	}
 
 	if len(product.Attributes) > 0 {
-		_, err = sq.Delete("product_attribute").Where("product_id", id).RunWith(repo.DB).Query()
+		_, err = sq.Delete("product_attribute").Where(predicate).RunWith(repo.DB).Query()
 
 		if err != nil {
 			tx.Rollback()
