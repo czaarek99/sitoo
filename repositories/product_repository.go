@@ -269,6 +269,12 @@ func (repo ProductRepositoryImpl) AddProduct(
 		}
 	}
 
+	tx, err := repo.DB.Begin()
+
+	if err != nil {
+		return 0, err
+	}
+
 	query, args, err := sq.Insert("product").
 		Columns(
 			"title",
@@ -284,9 +290,10 @@ func (repo ProductRepositoryImpl) AddProduct(
 		return 0, err
 	}
 
-	res, err := repo.DB.Exec(query, args...)
+	res, err := tx.Exec(query, args...)
 
 	if err != nil {
+		tx.Rollback()
 		return 0, err
 	}
 
@@ -301,9 +308,10 @@ func (repo ProductRepositoryImpl) AddProduct(
 			barcodeInsert = barcodeInsert.Values(productID, barcode)
 		}
 
-		_, err := barcodeInsert.RunWith(repo.DB).Query()
+		_, err := barcodeInsert.RunWith(tx).Query()
 
 		if err != nil {
+			tx.Rollback()
 			return 0, err
 		}
 	}
@@ -315,11 +323,18 @@ func (repo ProductRepositoryImpl) AddProduct(
 			attributeInsert = attributeInsert.Values(productID, attribute.Name, attribute.Value)
 		}
 
-		_, err := attributeInsert.RunWith(repo.DB).Query()
+		_, err := attributeInsert.RunWith(tx).Query()
 
 		if err != nil {
+			tx.Rollback()
 			return 0, err
 		}
+	}
+
+	err = tx.Commit()
+
+	if err != nil {
+		return 0, err
 	}
 
 	return productID, nil
