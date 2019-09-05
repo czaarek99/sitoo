@@ -327,7 +327,19 @@ func (repo Repository) UpdateProduct(
 func (repo Repository) DeleteProduct(
 	id domain.ProductId,
 ) error {
+	_, err := sq.Delete("product").Where("product_id", id).RunWith(repo.db).Query()
 
-	return nil
+	if err != nil {
+		return err
+	}
 
+	_, err = sq.Delete("product_barcode").Where("product_id", id).RunWith(repo.db).Query()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = sq.Delete("product_attribute").Where("product_id", id).RunWith(repo.db).Query()
+
+	return err
 }
