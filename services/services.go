@@ -8,7 +8,7 @@ import (
 )
 
 type Service struct {
-	repo domain.ProductRepository
+	Repo domain.ProductRepository
 }
 
 //TODO: Implement all validation
@@ -27,7 +27,7 @@ func (service Service) GetProducts(
 		num = 10
 	}
 
-	return service.repo.GetProducts(start, num, sku, barcode, fields)
+	return service.Repo.GetProducts(start, num, sku, barcode, fields)
 }
 
 func (service Service) GetProduct(
@@ -37,7 +37,7 @@ func (service Service) GetProduct(
 
 	log.Println("Requesting single product")
 
-	product, exists, err := service.repo.GetProduct(id, fields)
+	product, exists, err := service.Repo.GetProduct(id, fields)
 
 	if err != nil {
 		return product, err
@@ -55,7 +55,7 @@ func (service Service) AddProduct(
 
 	log.Println("Adding product")
 
-	exists, err := service.repo.SkuExists(product.Sku)
+	exists, err := service.Repo.SkuExists(product.Sku)
 
 	if err != nil {
 		return 0, err
@@ -65,7 +65,7 @@ func (service Service) AddProduct(
 		return 0, errors.New(fmt.Sprintf("SKU '%s' already exists", product.Sku))
 	}
 
-	return service.repo.AddProduct(product)
+	return service.Repo.AddProduct(product)
 }
 
 func (service Service) UpdateProduct(
@@ -73,7 +73,7 @@ func (service Service) UpdateProduct(
 	product domain.ProductUpdateInput,
 ) error {
 
-	exists, err := service.repo.ProductExists(id)
+	exists, err := service.Repo.ProductExists(id)
 
 	if err != nil {
 		return err
@@ -85,14 +85,14 @@ func (service Service) UpdateProduct(
 
 	log.Println("Updating product")
 
-	return service.repo.UpdateProduct(id, product)
+	return service.Repo.UpdateProduct(id, product)
 }
 
 func (service Service) DeleteProduct(
 	id domain.ProductId,
 ) error {
 
-	exists, err := service.repo.ProductExists(id)
+	exists, err := service.Repo.ProductExists(id)
 
 	if err != nil {
 		return err
@@ -102,6 +102,6 @@ func (service Service) DeleteProduct(
 		return errors.New(fmt.Sprintf("Product with productId (%v) does not exist", id))
 	}
 
-	return service.repo.DeleteProduct(id)
+	return service.Repo.DeleteProduct(id)
 
 }
