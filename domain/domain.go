@@ -67,5 +67,4 @@ type ProductRepository interface {
 	DeleteProduct(id ProductId) error
 	SkuExists(sku string) (bool, error)
 	ProductExists(id ProductId) (bool, error)
-	getTotalCount() (uint32, error)
 }
