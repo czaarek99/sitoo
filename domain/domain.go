@@ -78,8 +78,4 @@ type ErrorResponse struct {
 
 type ProductServer interface {
 	HandleRequest(writer http.ResponseWriter, request *http.Request)
-	/*HandleGET(request *http.Request) (interface{}, ErrorResponse)
-	HandlePOST(request *http.Request) (uint32, ErrorResponse)
-	HandlePUT(request *http.Request) (bool, ErrorResponse)
-	HandleDELETE(request *http.Request) (bool, ErrorResponse)*/
 }

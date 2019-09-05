@@ -11,7 +11,6 @@ type ProductServiceImpl struct {
 	Repo domain.ProductRepository
 }
 
-//TODO: Implement all validation
 //Catch database errors and print to console instead
 
 func (service ProductServiceImpl) GetProducts(
