@@ -29,6 +29,9 @@ type parsedGET struct {
 	fields  []string
 }
 
+//TODO: More logs
+//TODO: Don't leak normal logs
+
 func getBadRequestResponse(text string) domain.ErrorResponse {
 	return domain.ErrorResponse{
 		ErrorText:    text,
