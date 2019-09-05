@@ -447,16 +447,7 @@ func (repo ProductRepositoryImpl) ProductExists(
 	id domain.ProductId,
 ) (bool, error) {
 
-	rows, err := repo.DB.Query("SELECT COUNT(*) as count FROM product WHERE product_id = ?", id)
-	defer rows.Close()
-
-	if err != nil {
-		return false, err
-	}
-
-	var count uint16
-
-	err = rows.Scan(&count)
+	count, err := repo.count("SELECT COUNT(*) as count FROM product WHERE product_id = ?", id)
 
 	if err != nil {
 		return false, err
