@@ -343,3 +343,24 @@ func (repo Repository) DeleteProduct(
 
 	return err
 }
+
+func (repo Repository) ProductExists(
+	id domain.ProductId,
+) (bool, error) {
+
+	rows, err := repo.db.Query("SELECT COUNT(*) as count FROM product WHERE product_id = ?", id)
+
+	if err != nil {
+		return false, err
+	}
+
+	var count uint16
+
+	err = rows.Scan(&count)
+
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}

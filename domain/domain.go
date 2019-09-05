@@ -65,4 +65,5 @@ type ProductRepository interface {
 	UpdateProduct(id ProductId, product ProductUpdateInput) error
 	DeleteProduct(id ProductId) error
 	SkuExists(sku string) (bool, error)
+	ProductExists(id ProductId) (bool, error)
 }
