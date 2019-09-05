@@ -427,21 +427,38 @@ func (repo ProductRepositoryImpl) UpdateProduct(
 func (repo ProductRepositoryImpl) DeleteProduct(
 	id domain.ProductId,
 ) error {
-	_, err := sq.Delete("product").Where("product_id", id).RunWith(repo.DB).Query()
+	predicate := sq.Eq{
+		"product_id": id,
+	}
+
+	tx, err := repo.DB.Begin()
 
 	if err != nil {
 		return err
 	}
 
-	_, err = sq.Delete("product_barcode").Where("product_id", id).RunWith(repo.DB).Query()
+	_, err = sq.Delete("product").Where(predicate).RunWith(tx).Query()
 
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
-	_, err = sq.Delete("product_attribute").Where("product_id", id).RunWith(repo.DB).Query()
+	_, err = sq.Delete("product_barcode").Where(predicate).RunWith(tx).Query()
 
-	return err
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = sq.Delete("product_attribute").Where(predicate).RunWith(tx).Query()
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return nil
 }
 
 func (repo ProductRepositoryImpl) ProductExists(
