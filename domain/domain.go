@@ -1,6 +1,8 @@
 package domain
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type ProductId = uint32
 
@@ -16,8 +18,8 @@ type Product struct {
 	Barcodes    []string           `json:"barcodes"`
 	Description *string            `json:"description"`
 	Price       string             `json:"price"`
-	Created     uint32             `json:"created`
-	LastUpdated *uint32            `json:"lastUpdated"`
+	Created     int64              `json:"created"`
+	LastUpdated *int64             `json:"lastUpdated"`
 	Attributes  []ProductAttribute `json:"attributes"`
 }
 

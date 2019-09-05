@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"fmt"
 	"sitoo/domain"
 	"strconv"
 	"strings"
@@ -76,18 +77,45 @@ func rowsToProducts(rows *sql.Rows) ([]domain.Product, uint32, error) {
 		var attributeName string
 		var attributeValue string
 
+		var created string
+		var lastUpdated *string
+
 		err := rows.Scan(
 			&productEntity.ProductID,
 			&productEntity.Title,
 			&productEntity.Sku,
-			productEntity.Description,
+			&productEntity.Description,
 			&productEntity.Price,
-			&productEntity.Created,
-			productEntity.LastUpdated,
+			&created,
+			&lastUpdated,
 			&barcode,
 			&attributeName,
 			&attributeValue,
 		)
+
+		if err != nil {
+			return nil, 0, err
+		}
+
+		fmt.Println(created)
+
+		createdTime, err := time.Parse("2006-01-02 15:04:05", created)
+
+		productEntity.Created = createdTime.Unix()
+
+		if lastUpdated != nil {
+
+			lastUpdatedTime, err := time.Parse("2006-01-02 15:04:05", created)
+
+			if err != nil {
+				return nil, 0, err
+			}
+
+			lastUpdatedEpoc := lastUpdatedTime.Unix()
+
+			productEntity.LastUpdated = &lastUpdatedEpoc
+
+		}
 
 		if err != nil {
 			return nil, 0, err
@@ -102,8 +130,9 @@ func rowsToProducts(rows *sql.Rows) ([]domain.Product, uint32, error) {
 		first = false
 
 		if isNewId {
-			barcodeSlice := make([]string, 1)
-			attributeSlice := make([]domain.ProductAttribute, 1)
+
+			barcodeSlice := make([]string, 0)
+			attributeSlice := make([]domain.ProductAttribute, 0)
 
 			for key := range barcodes {
 				barcodeSlice = append(barcodeSlice, key)
