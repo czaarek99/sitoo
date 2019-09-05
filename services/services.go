@@ -92,6 +92,16 @@ func (service Service) DeleteProduct(
 	id domain.ProductId,
 ) error {
 
+	exists, err := service.repo.ProductExists(id)
+
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return errors.New(fmt.Sprintf("Product with productId (%v) does not exist", id))
+	}
+
 	return service.repo.DeleteProduct(id)
 
 }
