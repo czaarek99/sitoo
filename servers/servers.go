@@ -36,6 +36,13 @@ func getBadRequestResponse(text string) domain.ErrorResponse {
 	}
 }
 
+func getNotFoundResponse() domain.ErrorResponse {
+	return domain.ErrorResponse{
+		ErrorText:    "Not found",
+		ResponseCode: 404,
+	}
+}
+
 //Assumes properly formatted GET
 //Too much time to write a parser
 //Could use a library but this show i know more right?
@@ -150,20 +157,19 @@ func (server Server) HandleRequest(
 	if strings.HasPrefix(path, "/api/products") {
 
 		if request.Method == "GET" {
-
+			successResponse, errorResponse = server.handleGET(request)
 		} else if request.Method == "POST" {
-
+			successResponse, errorResponse = server.handlePOST(request)
 		} else if request.Method == "PUT" {
-
+			successResponse, errorResponse = server.handlePUT(request)
 		} else if request.Method == "DELETE" {
-
+			successResponse, errorResponse = server.handleDELETE(request)
+		} else {
+			errorResponse = getNotFoundResponse()
 		}
 
 	} else {
-		errorResponse = domain.ErrorResponse{
-			ErrorText:    "Not found",
-			ResponseCode: 404,
-		}
+		errorResponse = getNotFoundResponse()
 	}
 
 	var err error
