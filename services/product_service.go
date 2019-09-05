@@ -7,14 +7,14 @@ import (
 	"sitoo/domain"
 )
 
-type Service struct {
+type ProductServiceImpl struct {
 	Repo domain.ProductRepository
 }
 
 //TODO: Implement all validation
 //Catch database errors and print to console instead
 
-func (service Service) GetProducts(
+func (service ProductServiceImpl) GetProducts(
 	start uint64,
 	num uint64,
 	sku string,
@@ -31,7 +31,7 @@ func (service Service) GetProducts(
 	return service.Repo.GetProducts(start, num, sku, barcode, fields)
 }
 
-func (service Service) GetProduct(
+func (service ProductServiceImpl) GetProduct(
 	id domain.ProductId,
 	fields []string,
 ) (domain.Product, error) {
@@ -50,7 +50,7 @@ func (service Service) GetProduct(
 	return product, nil
 }
 
-func (service Service) AddProduct(
+func (service ProductServiceImpl) AddProduct(
 	product domain.ProductAddInput,
 ) (domain.ProductId, error) {
 
@@ -69,7 +69,7 @@ func (service Service) AddProduct(
 	return service.Repo.AddProduct(product)
 }
 
-func (service Service) UpdateProduct(
+func (service ProductServiceImpl) UpdateProduct(
 	id domain.ProductId,
 	product domain.ProductUpdateInput,
 ) error {
@@ -89,7 +89,7 @@ func (service Service) UpdateProduct(
 	return service.Repo.UpdateProduct(id, product)
 }
 
-func (service Service) DeleteProduct(
+func (service ProductServiceImpl) DeleteProduct(
 	id domain.ProductId,
 ) error {
 

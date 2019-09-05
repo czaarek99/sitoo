@@ -10,7 +10,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
-type Repository struct {
+type ProductRepositoryImpl struct {
 	DB *sql.DB
 }
 
@@ -112,7 +112,7 @@ func rowsToProducts(rows *sql.Rows) ([]domain.Product, uint32, error) {
 	return results, rowCount, nil
 }
 
-func (repo Repository) getTotalCount() (uint32, error) {
+func (repo ProductRepositoryImpl) getTotalCount() (uint32, error) {
 	rows, err := repo.DB.Query("SELECT COUNT(*) as count FROM product")
 
 	if err != nil {
@@ -135,7 +135,7 @@ Could be optimized to use 3 queries instead of one.
 That adds a lot of complexity to the problem so we'll
 skip that here.
 */
-func (repo Repository) GetProducts(
+func (repo ProductRepositoryImpl) GetProducts(
 	start uint64,
 	num uint64,
 	sku string,
@@ -195,7 +195,7 @@ func (repo Repository) GetProducts(
 	return products, count, nil
 }
 
-func (repo Repository) GetProduct(
+func (repo ProductRepositoryImpl) GetProduct(
 	id domain.ProductId,
 	fields []string,
 ) (domain.Product, bool, error) {
@@ -232,7 +232,7 @@ func (repo Repository) GetProduct(
 }
 
 //TODO: Figure out how to get errors from insert query
-func (repo Repository) AddProduct(
+func (repo ProductRepositoryImpl) AddProduct(
 	product domain.ProductAddInput,
 ) (domain.ProductId, error) {
 
@@ -289,7 +289,7 @@ func (repo Repository) AddProduct(
 }
 
 //TODO: Explain why we ignore a sku of nil later
-func (repo Repository) UpdateProduct(
+func (repo ProductRepositoryImpl) UpdateProduct(
 	id domain.ProductId,
 	product domain.ProductUpdateInput,
 ) error {
@@ -360,7 +360,7 @@ func (repo Repository) UpdateProduct(
 	return nil
 }
 
-func (repo Repository) DeleteProduct(
+func (repo ProductRepositoryImpl) DeleteProduct(
 	id domain.ProductId,
 ) error {
 	_, err := sq.Delete("product").Where("product_id", id).RunWith(repo.DB).Query()
@@ -380,7 +380,7 @@ func (repo Repository) DeleteProduct(
 	return err
 }
 
-func (repo Repository) count(
+func (repo ProductRepositoryImpl) count(
 	query string,
 	values ...interface{},
 ) (uint32, error) {
@@ -402,7 +402,7 @@ func (repo Repository) count(
 	return count, nil
 }
 
-func (repo Repository) ProductExists(
+func (repo ProductRepositoryImpl) ProductExists(
 	id domain.ProductId,
 ) (bool, error) {
 
@@ -423,7 +423,7 @@ func (repo Repository) ProductExists(
 	return count > 0, nil
 }
 
-func (repo Repository) SkuExists(
+func (repo ProductRepositoryImpl) SkuExists(
 	sku string,
 ) (bool, error) {
 

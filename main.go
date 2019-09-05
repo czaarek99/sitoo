@@ -18,11 +18,11 @@ func main() {
 		log.Fatal("Could not connect to database")
 	}
 
-	repo := repositories.Repository{
+	repo := repositories.ProductRepositoryImpl{
 		DB: connection,
 	}
 
-	service := services.Service{
+	service := services.ProductServiceImpl{
 		Repo: repo,
 	}
 
