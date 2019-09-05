@@ -19,6 +19,48 @@ type ProductRepositoryImpl struct {
 //TODO: Log database errors and don't expose them
 //TODO: Handle fields in database
 
+func (repo ProductRepositoryImpl) getTotalCount() (uint32, error) {
+	rows, err := repo.DB.Query("SELECT COUNT(*) as count FROM product")
+
+	defer rows.Close()
+
+	if err != nil {
+		return 0, err
+	}
+
+	var count uint32
+
+	err = rows.Scan(&count)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
+func (repo ProductRepositoryImpl) count(
+	query string,
+	values ...interface{},
+) (uint32, error) {
+
+	rows, err := repo.DB.Query(query, values)
+	defer rows.Close()
+	if err != nil {
+		return 0, err
+	}
+
+	var count uint32
+
+	err = rows.Scan(&count)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
 func getAttributeHash(attribute domain.ProductAttribute) string {
 	attributeHash := strings.Builder{}
 	attributeHash.WriteString(attribute.Name)
@@ -108,26 +150,6 @@ func rowsToProducts(rows *sql.Rows) ([]domain.Product, uint32, error) {
 	}
 
 	return results, rowCount, nil
-}
-
-func (repo ProductRepositoryImpl) getTotalCount() (uint32, error) {
-	rows, err := repo.DB.Query("SELECT COUNT(*) as count FROM product")
-
-	defer rows.Close()
-
-	if err != nil {
-		return 0, err
-	}
-
-	var count uint32
-
-	err = rows.Scan(&count)
-
-	if err != nil {
-		return 0, err
-	}
-
-	return count, nil
 }
 
 /*
@@ -382,28 +404,6 @@ func (repo ProductRepositoryImpl) DeleteProduct(
 	_, err = sq.Delete("product_attribute").Where("product_id", id).RunWith(repo.DB).Query()
 
 	return err
-}
-
-func (repo ProductRepositoryImpl) count(
-	query string,
-	values ...interface{},
-) (uint32, error) {
-
-	rows, err := repo.DB.Query(query, values)
-	defer rows.Close()
-	if err != nil {
-		return 0, err
-	}
-
-	var count uint32
-
-	err = rows.Scan(&count)
-
-	if err != nil {
-		return 0, err
-	}
-
-	return count, nil
 }
 
 func (repo ProductRepositoryImpl) ProductExists(
