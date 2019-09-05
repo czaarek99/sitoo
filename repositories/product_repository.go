@@ -29,8 +29,6 @@ func getAttributeHash(attribute domain.ProductAttribute) string {
 }
 
 func rowsToProducts(rows *sql.Rows) ([]domain.Product, uint32, error) {
-	defer rows.Close()
-
 	results := make([]domain.Product, 1)
 
 	var rowCount uint32
@@ -115,6 +113,8 @@ func rowsToProducts(rows *sql.Rows) ([]domain.Product, uint32, error) {
 func (repo ProductRepositoryImpl) getTotalCount() (uint32, error) {
 	rows, err := repo.DB.Query("SELECT COUNT(*) as count FROM product")
 
+	defer rows.Close()
+
 	if err != nil {
 		return 0, err
 	}
@@ -176,6 +176,8 @@ func (repo ProductRepositoryImpl) GetProducts(
 
 	rows, err := query.RunWith(repo.DB).Query()
 
+	defer rows.Close()
+
 	if err != nil {
 		return nil, 0, err
 	}
@@ -221,6 +223,8 @@ func (repo ProductRepositoryImpl) GetProduct(
 		OrderBy("product.product_id").
 		RunWith(repo.DB).
 		Query()
+
+	defer rows.Close()
 
 	if err != nil {
 		return domain.Product{}, false, err
@@ -386,7 +390,7 @@ func (repo ProductRepositoryImpl) count(
 ) (uint32, error) {
 
 	rows, err := repo.DB.Query(query, values)
-
+	defer rows.Close()
 	if err != nil {
 		return 0, err
 	}
@@ -407,6 +411,7 @@ func (repo ProductRepositoryImpl) ProductExists(
 ) (bool, error) {
 
 	rows, err := repo.DB.Query("SELECT COUNT(*) as count FROM product WHERE product_id = ?", id)
+	defer rows.Close()
 
 	if err != nil {
 		return false, err
