@@ -17,6 +17,7 @@ type Repository struct {
 //TODO: Handle price string - float conversion?
 //TODO: Handle update/insert in transactions
 //TODO: Log database errors and don't expose them
+//TODO: Handle fields in database
 
 func getAttributeHash(attribute domain.ProductAttribute) string {
 	attributeHash := strings.Builder{}
