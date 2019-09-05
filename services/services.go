@@ -19,7 +19,7 @@ func (service Service) GetProducts(
 	sku string,
 	barcode string,
 	fields []string,
-) ([]domain.Product, error) {
+) ([]domain.Product, uint32, error) {
 
 	log.Println("Requesting multiple products")
 

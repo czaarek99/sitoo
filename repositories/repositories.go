@@ -104,6 +104,24 @@ func rowsToProducts(rows *sql.Rows) []domain.Product {
 	return results
 }
 
+func (repo Repository) getTotalCount() (uint32, error) {
+	rows, err := repo.db.Query("SELECT COUNT(*) as count FROM product")
+
+	if err != nil {
+		return 0, err
+	}
+
+	var count uint32
+
+	err = rows.Scan(&count)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
 /*
 Could be optimized to use 3 queries instead of one.
 That adds a lot of complexity to the problem so we'll
@@ -115,7 +133,7 @@ func (repo Repository) GetProducts(
 	sku string,
 	barcode string,
 	fields string,
-) ([]domain.Product, error) {
+) ([]domain.Product, uint32, error) {
 
 	query := sq.Select(
 		"product.product_id",
@@ -151,10 +169,22 @@ func (repo Repository) GetProducts(
 	rows, err := query.RunWith(repo.db).Query()
 
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return rowsToProducts(rows), nil
+	products, err := rowsToProducts(rows), nil
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	count, err := repo.getTotalCount()
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return products, count, nil
 }
 
 func (repo Repository) GetProduct(

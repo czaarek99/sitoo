@@ -44,7 +44,7 @@ type ProductService interface {
 		sku string,
 		barcode string,
 		fields []string,
-	) ([]Product, error)
+	) ([]Product, uint32, error)
 
 	GetProduct(id ProductId, fields []string) (Product, error)
 	AddProduct(product ProductAddInput) (ProductId, error)
@@ -59,7 +59,7 @@ type ProductRepository interface {
 		sku string,
 		barcode string,
 		fields []string,
-	) ([]Product, error)
+	) ([]Product, uint32, error)
 
 	GetProduct(id ProductId, fields []string) (Product, error)
 	AddProduct(product ProductAddInput) (ProductId, error)
@@ -67,4 +67,5 @@ type ProductRepository interface {
 	DeleteProduct(id ProductId) error
 	SkuExists(sku string) (bool, error)
 	ProductExists(id ProductId) (bool, error)
+	getTotalCount() (uint32, error)
 }
