@@ -191,6 +191,33 @@ func (server Server) handlePUT(
 	request *http.Request,
 ) {
 
+	id, err := getProductIdFromPath(request.URL.Path)
+
+	if err != nil {
+		writeError(writer, getBadRequestResponse("Bad Request"))
+	}
+
+	var changes domain.ProductUpdateInput
+
+	decoder := json.NewDecoder(request.Body)
+	err = decoder.Decode(&changes)
+
+	defer request.Body.Close()
+
+	if err != nil {
+		writeError(writer, getBadRequestResponse(err.Error()))
+		return
+	}
+
+	err = server.Service.UpdateProduct(id, changes)
+
+	if err != nil {
+		writeError(writer, getBadRequestResponse(err.Error()))
+	} else {
+		writer.WriteHeader(http.StatusOK)
+		writer.Write([]byte("true"))
+	}
+
 }
 
 func (server Server) handleDELETE(
