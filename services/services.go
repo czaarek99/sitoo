@@ -23,6 +23,10 @@ func (service Service) GetProducts(
 
 	log.Println("Requesting multiple products")
 
+	if num == 0 {
+		num = 10
+	}
+
 	return service.repo.GetProducts(start, num, sku, barcode, fields)
 }
 
