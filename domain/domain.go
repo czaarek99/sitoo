@@ -1,5 +1,7 @@
 package domain
 
+import "net/http"
+
 type ProductId = uint32
 
 type ProductAttribute struct {
@@ -67,4 +69,16 @@ type ProductRepository interface {
 	DeleteProduct(id ProductId) error
 	SkuExists(sku string) (bool, error)
 	ProductExists(id ProductId) (bool, error)
+}
+
+type ErrorResponse struct {
+	ErrorText    string `json:"errorText"`
+	responseCode int
+}
+
+type ProductServer interface {
+	HandleGET(request *http.Request) (interface{}, ErrorResponse)
+	HandlePOST(request *http.Request) (uint32, ErrorResponse)
+	HandlePUT(request *http.Request) (bool, ErrorResponse)
+	HandleDELETE(request *http.Request) (bool, ErrorResponse)
 }
