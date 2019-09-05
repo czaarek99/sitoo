@@ -51,84 +51,75 @@ func getAttributeHash(attribute domain.ProductAttribute) string {
 func rowsToProducts(rows *sql.Rows) []domain.Product {
 	defer rows.Close()
 
-	productMap := make(map[domain.ProductId]DatabaseProduct)
+	results := make([]domain.Product, 1)
+
+	first := true
+	barcodes := make(map[string]struct{})
+	attributes := make(map[string]domain.ProductAttribute)
+
+	index := 0
+	var prevId uint32
 
 	for rows.Next() {
-		row := DatabaseRow{}
+		productEntity := domain.Product{}
+
+		var barcode string
+		var attributeName string
+		var attributeValue string
 
 		rows.Scan(
-			&row.productID,
-			&row.title,
-			&row.sku,
-			&row.description,
-			&row.price,
-			&row.created,
-			&row.lastUpdated,
-			&row.barcode,
-			&row.attributeName,
-			&row.attributeValue,
+			&productEntity.ProductID,
+			&productEntity.Title,
+			&productEntity.Sku,
+			&productEntity.Description,
+			&productEntity.Price,
+			&productEntity.Created,
+			&productEntity.LastUpdated,
+			&barcode,
+			&attributeName,
+			&attributeValue,
 		)
 
-		_, exists := productMap[row.productID]
+		isNewId := prevId != productEntity.ProductID
 
-		if !exists {
-			barcodes := make(map[string]struct{})
-			attributes := make(map[string]domain.ProductAttribute)
-
-			productMap[row.productID] = DatabaseProduct{
-				productID:   row.productID,
-				title:       row.title,
-				sku:         row.sku,
-				description: row.description,
-				price:       row.price,
-				created:     row.created,
-				lastUpdated: row.lastUpdated,
-				barcodes:    barcodes,
-				attributes:  attributes,
-			}
+		if first || isNewId {
+			results = append(results, productEntity)
 		}
 
-		mapEntry, _ := productMap[row.productID]
+		first = false
 
-		mapEntry.barcodes[row.barcode] = struct{}{}
+		if isNewId {
+			barcodeSlice := make([]string, 1)
+			attributeSlice := make([]domain.ProductAttribute, 1)
+
+			for key := range barcodes {
+				barcodeSlice = append(barcodeSlice, key)
+			}
+
+			for _, value := range attributes {
+				attributeSlice = append(attributeSlice, value)
+			}
+
+			results[index].Barcodes = barcodeSlice
+			results[index].Attributes = attributeSlice
+
+			barcodes = make(map[string]struct{})
+			attributes = make(map[string]domain.ProductAttribute)
+
+			index++
+		}
 
 		attribute := domain.ProductAttribute{
-			Name:  row.attributeName,
-			Value: row.attributeValue,
+			Name:  attributeName,
+			Value: attributeValue,
 		}
 
-		hash := getAttributeHash(attribute)
+		attributeHash := getAttributeHash(attribute)
+		attributes[attributeHash] = attribute
+		barcodes[barcode] = struct{}{}
 
-		mapEntry.attributes[hash] = attribute
+		prevId = productEntity.ProductID
 	}
-
-	results := make([]domain.Product, 5)
-
-	for _, value := range productMap {
-		barcodeSlice := make([]string, 5)
-		attributeSlice := make([]domain.ProductAttribute, 5)
-
-		for key := range value.barcodes {
-			barcodeSlice = append(barcodeSlice, key)
-		}
-
-		for _, attribute := range value.attributes {
-			attributeSlice = append(attributeSlice, attribute)
-		}
-
-		results = append(results, domain.Product{
-			ProductID:   value.productID,
-			Title:       value.title,
-			Sku:         value.sku,
-			Description: value.description,
-			Price:       value.price,
-			Created:     value.created,
-			LastUpdated: value.lastUpdated,
-			Barcodes:    barcodeSlice,
-			Attributes:  attributeSlice,
-		})
-	}
-
 	return results
 }
 
