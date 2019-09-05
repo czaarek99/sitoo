@@ -295,25 +295,20 @@ func (repo Repository) UpdateProduct(
 ) error {
 	query := sq.Update("product").Where("product_id", id)
 
-	changes := make(map[string]interface{})
 	if product.Title != nil {
-		changes["title"] = product.Title
+		query.Set("title", product.Title)
 	}
 
 	if product.Sku != nil {
-		changes["sku"] = product.Sku
+		query.Set("sku", product.Sku)
 	}
 
 	if product.Description != nil {
-		changes["description"] = product.Description
+		query.Set("description", product.Description)
 	}
 
 	if product.Price != nil {
-		changes["price"] = product.Price
-	}
-
-	for key, value := range changes {
-		query = query.Set(key, value)
+		query.Set("price", product.Price)
 	}
 
 	_, err := query.RunWith(repo.DB).Query()
