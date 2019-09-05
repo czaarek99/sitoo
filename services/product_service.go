@@ -11,6 +11,15 @@ type ProductServiceImpl struct {
 	Repo domain.ProductRepository
 }
 
+func getGenericDatabaseError() error {
+	return errors.New("Database error")
+}
+
+func handleDatabaseError(err error) {
+	log.Println("Database error:")
+	log.Println(err.Error())
+}
+
 //Catch database errors and print to console instead
 
 func (service ProductServiceImpl) GetProducts(
@@ -40,7 +49,8 @@ func (service ProductServiceImpl) GetProduct(
 	product, exists, err := service.Repo.GetProduct(id, fields)
 
 	if err != nil {
-		return product, err
+		handleDatabaseError(err)
+		return product, getGenericDatabaseError()
 	} else if !exists {
 		newErr := errors.New(fmt.Sprintf("Can't find product %v", id))
 		return product, newErr
@@ -58,14 +68,22 @@ func (service ProductServiceImpl) AddProduct(
 	exists, err := service.Repo.SkuExists(product.Sku)
 
 	if err != nil {
-		return 0, err
+		handleDatabaseError(err)
+		return 0, getGenericDatabaseError()
 	}
 
 	if exists {
 		return 0, errors.New(fmt.Sprintf("SKU '%s' already exists", product.Sku))
 	}
 
-	return service.Repo.AddProduct(product)
+	id, err := service.Repo.AddProduct(product)
+
+	if err != nil {
+		handleDatabaseError(err)
+		return 0, getGenericDatabaseError()
+	}
+
+	return id, nil
 }
 
 func (service ProductServiceImpl) UpdateProduct(
@@ -76,7 +94,8 @@ func (service ProductServiceImpl) UpdateProduct(
 	exists, err := service.Repo.ProductExists(id)
 
 	if err != nil {
-		return err
+		handleDatabaseError(err)
+		return getGenericDatabaseError()
 	}
 
 	if !exists {
@@ -85,7 +104,14 @@ func (service ProductServiceImpl) UpdateProduct(
 
 	log.Println("Updating product")
 
-	return service.Repo.UpdateProduct(id, product)
+	err = service.Repo.UpdateProduct(id, product)
+
+	if err != nil {
+		handleDatabaseError(err)
+		return getGenericDatabaseError()
+	}
+
+	return nil
 }
 
 func (service ProductServiceImpl) DeleteProduct(
@@ -95,13 +121,20 @@ func (service ProductServiceImpl) DeleteProduct(
 	exists, err := service.Repo.ProductExists(id)
 
 	if err != nil {
-		return err
+		handleDatabaseError(err)
+		return getGenericDatabaseError()
 	}
 
 	if !exists {
 		return errors.New(fmt.Sprintf("Product with productId (%v) does not exist", id))
 	}
 
-	return service.Repo.DeleteProduct(id)
+	err = service.Repo.DeleteProduct(id)
 
+	if err != nil {
+		handleDatabaseError(err)
+		return getGenericDatabaseError()
+	}
+
+	return nil
 }
