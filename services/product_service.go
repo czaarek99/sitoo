@@ -36,7 +36,14 @@ func (service ProductServiceImpl) GetProducts(
 		num = 10
 	}
 
-	return service.Repo.GetProducts(start, num, sku, barcode, fields)
+	products, count, err := service.Repo.GetProducts(start, num, sku, barcode, fields)
+
+	if err != nil {
+		handleDatabaseError(err)
+		return nil, 0, getGenericDatabaseError()
+	}
+
+	return products, count, nil
 }
 
 func (service ProductServiceImpl) GetProduct(
