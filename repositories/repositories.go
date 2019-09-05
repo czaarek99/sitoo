@@ -45,7 +45,7 @@ func rowsToProducts(rows *sql.Rows) []domain.Product {
 			&productEntity.ProductID,
 			&productEntity.Title,
 			&productEntity.Sku,
-			&productEntity.Description,
+			productEntity.Description,
 			&productEntity.Price,
 			&productEntity.Created,
 			&productEntity.LastUpdated,
@@ -94,6 +94,7 @@ func rowsToProducts(rows *sql.Rows) []domain.Product {
 
 		prevId = productEntity.ProductID
 	}
+
 	return results
 }
 

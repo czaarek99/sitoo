@@ -12,7 +12,7 @@ type Product struct {
 	Title       string
 	Sku         string
 	Barcodes    []string
-	Description string
+	Description *string
 	Price       string
 	Created     uint32
 	LastUpdated uint32
