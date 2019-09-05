@@ -31,8 +31,8 @@ type parsedGET struct {
 }
 
 type MultipleGetResponse struct {
-	TotalCount uint32 `json:"totalCount"`
-	Items      []domain.Product
+	TotalCount uint32           `json:"totalCount"`
+	Items      []domain.Product `json:"items"`
 }
 
 func getBadRequestResponse(text string) domain.ErrorResponse {
