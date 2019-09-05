@@ -5,6 +5,7 @@ import (
 	"sitoo/domain"
 	"strconv"
 	"strings"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 )
@@ -211,8 +212,9 @@ func (repo Repository) AddProduct(
 			"sku",
 			"description",
 			"price",
+			"created",
 		).
-		Values(product.Title, product.Sku, description, price).
+		Values(product.Title, product.Sku, description, price, time.Now()).
 		RunWith(repo.db)
 
 	var productID domain.ProductId
