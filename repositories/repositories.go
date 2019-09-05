@@ -48,7 +48,7 @@ func rowsToProducts(rows *sql.Rows) []domain.Product {
 			productEntity.Description,
 			&productEntity.Price,
 			&productEntity.Created,
-			&productEntity.LastUpdated,
+			productEntity.LastUpdated,
 			&barcode,
 			&attributeName,
 			&attributeValue,

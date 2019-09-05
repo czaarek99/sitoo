@@ -15,7 +15,7 @@ type Product struct {
 	Description *string
 	Price       string
 	Created     uint32
-	LastUpdated uint32
+	LastUpdated *uint32
 	Attributes  []ProductAttribute
 }
 
