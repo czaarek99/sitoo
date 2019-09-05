@@ -2,7 +2,6 @@ package servers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"path"
 	"sitoo/domain"
@@ -30,11 +29,6 @@ type parsedGET struct {
 	fields  []string
 }
 
-type MultipleGetResponse struct {
-	TotalCount uint32           `json:"totalCount"`
-	Items      []domain.Product `json:"items"`
-}
-
 func getBadRequestResponse(text string) domain.ErrorResponse {
 	return domain.ErrorResponse{
 		ErrorText:    text,
@@ -46,6 +40,29 @@ func getNotFoundResponse() domain.ErrorResponse {
 	return domain.ErrorResponse{
 		ErrorText:    "Not found",
 		ResponseCode: 404,
+	}
+}
+
+func writeError(
+	writer http.ResponseWriter,
+	errorResponse domain.ErrorResponse,
+) {
+	writeJson(writer, errorResponse, errorResponse.ResponseCode)
+}
+
+func writeJson(
+	writer http.ResponseWriter,
+	item interface{},
+	statusCode int,
+) {
+	jsonBytes, err := json.Marshal(item)
+
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+	} else {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(statusCode)
+		writer.Write(jsonBytes)
 	}
 }
 
@@ -92,8 +109,9 @@ func parseGET(request *http.Request) parsedGET {
 }
 
 func (server Server) handleGET(
+	writer http.ResponseWriter,
 	request *http.Request,
-) (interface{}, domain.ErrorResponse) {
+) {
 
 	parsed := parseGET(request)
 
@@ -101,9 +119,9 @@ func (server Server) handleGET(
 		product, error := server.Service.GetProduct(parsed.productID, parsed.fields)
 
 		if error != nil {
-			return MultipleGetResponse{}, getBadRequestResponse(error.Error())
+			writeError(writer, getBadRequestResponse(error.Error()))
 		} else {
-			return product, domain.ErrorResponse{}
+			writeJson(writer, product, http.StatusOK)
 		}
 	} else {
 		products, count, error := server.Service.GetProducts(
@@ -115,19 +133,25 @@ func (server Server) handleGET(
 		)
 
 		if error != nil {
-			return MultipleGetResponse{}, getBadRequestResponse(error.Error())
+			writeError(writer, getBadRequestResponse(error.Error()))
 		} else {
-			return MultipleGetResponse{
+			envelope := struct {
+				TotalCount uint32           `json:"totalCount"`
+				Items      []domain.Product `json:"items"`
+			}{
 				TotalCount: count,
 				Items:      products,
-			}, domain.ErrorResponse{}
+			}
+
+			writeJson(writer, envelope, http.StatusOK)
 		}
 	}
 }
 
 func (server Server) handlePOST(
+	writer http.ResponseWriter,
 	request *http.Request,
-) (uint32, domain.ErrorResponse) {
+) {
 
 	var product domain.ProductAddInput
 
@@ -135,31 +159,35 @@ func (server Server) handlePOST(
 	err := decoder.Decode(&product)
 
 	if err != nil {
-		return 0, getBadRequestResponse(err.Error())
+		writeError(writer, getBadRequestResponse(err.Error()))
+		return
 	}
 
 	var id domain.ProductId
 	id, err = server.Service.AddProduct(product)
 
 	if err != nil {
-		return 0, getBadRequestResponse(err.Error())
+		writeError(writer, getBadRequestResponse(err.Error()))
+		return
 	}
 
-	return id, domain.ErrorResponse{}
+	idString := strconv.FormatUint(uint64(id), 10)
+	writer.Write([]byte(idString))
+	writer.WriteHeader(http.StatusOK)
 }
 
 func (server Server) handlePUT(
+	writer http.ResponseWriter,
 	request *http.Request,
-) (bool, domain.ErrorResponse) {
+) {
 
-	return false, domain.ErrorResponse{}
 }
 
 func (server Server) handleDELETE(
+	writer http.ResponseWriter,
 	request *http.Request,
-) (bool, domain.ErrorResponse) {
+) {
 
-	return false, domain.ErrorResponse{}
 }
 
 func (server Server) HandleRequest(
@@ -167,62 +195,29 @@ func (server Server) HandleRequest(
 	request *http.Request,
 ) {
 
-	var errorResponse domain.ErrorResponse
-	var jsonResponse interface{}
-	var stringResponse string
+	var notFoundError domain.ErrorResponse
 
 	path := request.URL.Path
 
 	if strings.HasPrefix(path, "/api/products") {
 
 		if request.Method == "GET" {
-			jsonResponse, errorResponse = server.handleGET(request)
+			server.handleGET(writer, request)
 		} else if request.Method == "POST" {
-			productID, err := server.handlePOST(request)
-
-			errorResponse = err
-			stringResponse = strconv.FormatUint(uint64(productID), 10)
+			server.handlePOST(writer, request)
 		} else if request.Method == "PUT" {
-			success, err := server.handlePUT(request)
-
-			errorResponse = err
-			stringResponse = strconv.FormatBool(success)
+			server.handlePUT(writer, request)
 		} else if request.Method == "DELETE" {
-			success, err := server.handleDELETE(request)
-
-			errorResponse = err
-			stringResponse = strconv.FormatBool(success)
-
+			server.handleDELETE(writer, request)
 		} else {
-			errorResponse = getNotFoundResponse()
+			notFoundError = getNotFoundResponse()
 		}
 
 	} else {
-		errorResponse = getNotFoundResponse()
+		notFoundError = getNotFoundResponse()
 	}
 
-	if stringResponse != "" {
-		fmt.Fprint(writer, stringResponse)
-		writer.WriteHeader(http.StatusOK)
-	} else {
-		writer.Header().Set("Content-Type", "application/json")
-
-		var jsonBytes []byte
-		var err error
-
-		if errorResponse.ResponseCode == 0 {
-			writer.WriteHeader(http.StatusOK)
-
-			jsonBytes, err = json.Marshal(jsonResponse)
-		} else {
-			jsonBytes, err = json.Marshal(errorResponse)
-		}
-
-		if err != nil {
-			writer.WriteHeader(http.StatusInternalServerError)
-		} else {
-			writer.WriteHeader(errorResponse.ResponseCode)
-			writer.Write(jsonBytes)
-		}
+	if notFoundError.ResponseCode != 0 {
+		writeError(writer, notFoundError)
 	}
 }
