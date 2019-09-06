@@ -316,6 +316,8 @@ func (repo ProductRepositoryImpl) GetProduct(
 		RunWith(repo.DB).
 		Query()
 
+	defer barcodeRows.Close()
+
 	if err != nil {
 		return domain.Product{}, false, err
 	}
@@ -337,6 +339,8 @@ func (repo ProductRepositoryImpl) GetProduct(
 		Where(predicate).
 		RunWith(repo.DB).
 		Query()
+
+	defer attributeRows.Close()
 
 	if err != nil {
 		return domain.Product{}, false, err
