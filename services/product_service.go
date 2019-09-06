@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-//TODO: Disallow non unique product-attributes
-
 type ProductServiceImpl struct {
 	Repo domain.ProductRepository
 }
