@@ -3,7 +3,6 @@ package validation
 import (
 	"errors"
 	"fmt"
-	"log"
 	"sitoo/domain"
 	"strconv"
 	"strings"
@@ -28,11 +27,6 @@ func GetBarcodesNotUniqueError() error {
 
 func GetSkuAlreadyExistsError(sku string) error {
 	return fmt.Errorf("SKU '%s' already exists", sku)
-}
-
-func HandleDatabaseError(err error) {
-	log.Println("Database error:")
-	log.Println(err.Error())
 }
 
 func validateBarcodes(barcodes []string) error {

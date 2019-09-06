@@ -7,6 +7,7 @@ import (
 	"sitoo/repositories"
 	"sitoo/servers"
 	"sitoo/services"
+	"sitoo/util"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -22,19 +23,24 @@ func main() {
 		log.Fatal("Could not connect to database")
 	}
 
-	repo := repositories.ProductRepositoryImpl{
-		DB: connection,
-	}
-
-	service := services.ProductServiceImpl{
-		Repo: repo,
-	}
-
-	server := servers.Server{
-		Service: service,
-	}
+	var requestId uint32
 
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		repo := repositories.ProductRepositoryImpl{
+			DB: connection,
+		}
+
+		service := services.ProductServiceImpl{
+			Repo: repo,
+			Metadata: util.Metadata{
+				RequestID: requestId,
+			},
+		}
+
+		server := servers.Server{
+			Service: service,
+		}
+
 		server.HandleRequest(writer, request)
 	})
 
