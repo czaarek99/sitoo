@@ -61,11 +61,11 @@ func (service ProductServiceImpl) validateAttributes(
 
 	for _, attribute := range attributes {
 		if len(attribute.Name) > 16 {
-			return errors.New("Attribute name too long")
+			return fmt.Errorf("Attribute name (%s) is longer than max of 16 characters", attribute.Name)
 		}
 
 		if len(attribute.Value) > 32 {
-			return errors.New("Attribute value too long")
+			return fmt.Errorf("Attribute value (%s) is longer than max of 32 characters", attribute.Value)
 		}
 
 		hash := getAttributeHash(attribute)
