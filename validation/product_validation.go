@@ -82,6 +82,11 @@ func validateAttributes(attributes []domain.ProductAttribute) error {
 }
 
 func validateTitle(title string) error {
+
+	if len(title) == 0 {
+		return errors.New("Title can not be empty")
+	}
+
 	if len(title) > 32 {
 		return fmt.Errorf("Product title (%s) is longer than max of 32 characters", title)
 	}
@@ -90,6 +95,11 @@ func validateTitle(title string) error {
 }
 
 func validateSku(sku string) error {
+
+	if len(sku) == 0 {
+		return errors.New("Sku can not be empty")
+	}
+
 	if len(sku) > 32 {
 		return fmt.Errorf("Product sku (%s) is longer than max of 32 characters", sku)
 	}
