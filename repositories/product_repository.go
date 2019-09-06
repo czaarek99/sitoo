@@ -59,112 +59,6 @@ func convertSQLDateToTimestamp(date string) (int64, error) {
 	return createdTime.Unix(), nil
 }
 
-func rowsToProducts(rows *sql.Rows) ([]domain.Product, uint32, error) {
-	results := make([]domain.Product, 0)
-
-	var rowCount uint32
-
-	first := true
-	barcodes := make(map[string]struct{})
-	attributes := make(map[string]domain.ProductAttribute)
-
-	index := 0
-	var prevId uint32
-
-	for rows.Next() {
-		rowCount++
-
-		productEntity := domain.Product{}
-
-		var barcode string
-		var attributeName string
-		var attributeValue string
-
-		var created string
-		var lastUpdated *string
-
-		err := rows.Scan(
-			&productEntity.ProductID,
-			&productEntity.Title,
-			&productEntity.Sku,
-			&productEntity.Description,
-			&productEntity.Price,
-			&created,
-			&lastUpdated,
-			&barcode,
-			&attributeName,
-			&attributeValue,
-		)
-
-		if err != nil {
-			return nil, 0, err
-		}
-
-		productEntity.Created, err = convertSQLDateToTimestamp(created)
-
-		if err != nil {
-			return nil, 0, err
-		}
-
-		if lastUpdated != nil {
-			lastUpdatedTime, err := convertSQLDateToTimestamp(*lastUpdated)
-
-			if err != nil {
-				return nil, 0, err
-			}
-
-			productEntity.LastUpdated = &lastUpdatedTime
-		}
-
-		if err != nil {
-			return nil, 0, err
-		}
-
-		isNewId := prevId != productEntity.ProductID
-
-		if first || isNewId {
-			results = append(results, productEntity)
-		}
-
-		first = false
-
-		if isNewId {
-
-			barcodeSlice := make([]string, 0)
-			attributeSlice := make([]domain.ProductAttribute, 0)
-
-			for key := range barcodes {
-				barcodeSlice = append(barcodeSlice, key)
-			}
-
-			for _, value := range attributes {
-				attributeSlice = append(attributeSlice, value)
-			}
-
-			results[index].Barcodes = barcodeSlice
-			results[index].Attributes = attributeSlice
-
-			barcodes = make(map[string]struct{})
-			attributes = make(map[string]domain.ProductAttribute)
-
-			index++
-		}
-
-		attribute := domain.ProductAttribute{
-			Name:  attributeName,
-			Value: attributeValue,
-		}
-
-		attributeHash := getAttributeHash(attribute)
-		attributes[attributeHash] = attribute
-		barcodes[barcode] = struct{}{}
-
-		prevId = productEntity.ProductID
-	}
-
-	return results, rowCount, nil
-}
-
 func (repo ProductRepositoryImpl) GetProducts(
 	start uint64,
 	num uint64,
@@ -181,16 +75,11 @@ func (repo ProductRepositoryImpl) GetProducts(
 		"product.price",
 		"product.created",
 		"product.last_updated",
-		"product_barcode.barcode",
-		"product_attribute.name",
-		"product_attribute.value",
 	).
 		LeftJoin("product_barcode USING (product_id)").
-		LeftJoin("product_attribute USING (product_id)").
 		From("product").
 		Limit(num).
-		Offset(start).
-		OrderBy("product.product_id")
+		Offset(start)
 
 	if sku != "" {
 		query = query.Where(sq.Eq{
@@ -212,16 +101,133 @@ func (repo ProductRepositoryImpl) GetProducts(
 		return nil, 0, err
 	}
 
-	products, _, err := rowsToProducts(rows)
+	productsMap := map[domain.ProductId]domain.Product{}
+
+	prefix := ""
+	inBuilder := strings.Builder{}
+
+	inBuilder.WriteString("product_id IN(")
+
+	for rows.Next() {
+		product := domain.Product{}
+
+		rows.Scan()
+		var created string
+		var lastUpdated *string
+
+		err = rows.Scan(
+			&product.ProductID,
+			&product.Title,
+			&product.Sku,
+			&product.Description,
+			&product.Price,
+			&created,
+			&lastUpdated,
+		)
+
+		if err != nil {
+			return nil, 0, err
+		}
+
+		if lastUpdated != nil {
+			lastUpdatedTimestamp, err := convertSQLDateToTimestamp(*lastUpdated)
+
+			if err != nil {
+				return nil, 0, err
+			}
+
+			product.LastUpdated = &lastUpdatedTimestamp
+		}
+
+		product.Created, err = convertSQLDateToTimestamp(created)
+
+		if err != nil {
+			return nil, 0, err
+		}
+
+		idString := strconv.FormatUint(uint64(product.ProductID), 10)
+
+		inBuilder.WriteString(prefix)
+		prefix = ","
+		inBuilder.WriteString(idString)
+
+		productsMap[product.ProductID] = product
+	}
+
+	inBuilder.WriteString(")")
+
+	barcodeRows, err := sq.Select("product_id", "barcode").
+		From("product_barcode").
+		Where(inBuilder.String()).
+		RunWith(repo.DB).
+		Query()
+
+	defer barcodeRows.Close()
 
 	if err != nil {
 		return nil, 0, err
+	}
+
+	for barcodeRows.Next() {
+		var productID uint32
+		var barcode string
+
+		err := barcodeRows.Scan(&productID, &barcode)
+
+		if err != nil {
+			return nil, 0, err
+		}
+
+		product := productsMap[productID]
+		product.Barcodes = append(product.Barcodes, barcode)
+
+		productsMap[productID] = product
+	}
+
+	attributeRows, err := sq.Select("product_id", "name", "value").
+		From("product_attribute").
+		Where(inBuilder.String()).
+		RunWith(repo.DB).
+		Query()
+
+	defer attributeRows.Close()
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	for attributeRows.Next() {
+		var productID uint32
+		var name string
+		var value string
+
+		err := attributeRows.Scan(&productID, &name, &value)
+
+		if err != nil {
+			return nil, 0, err
+		}
+
+		attribute := domain.ProductAttribute{
+			Name:  name,
+			Value: value,
+		}
+
+		product := productsMap[productID]
+		product.Attributes = append(product.Attributes, attribute)
+
+		productsMap[productID] = product
 	}
 
 	count, err := repo.count("SELECT COUNT(*) as count FROM product")
 
 	if err != nil {
 		return nil, 0, err
+	}
+
+	products := []domain.Product{}
+
+	for _, product := range productsMap {
+		products = append(products, product)
 	}
 
 	return products, count, nil
