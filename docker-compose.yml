@@ -1,4 +1,6 @@
 version: "3.7"
+
+services:
   database:
     image: mysql
     restart: always
@@ -9,6 +11,8 @@ version: "3.7"
       MYSQL_DATABASE: sitoo_test_assignment
       MYSQL_USER: sitoo
       MYSQL_PASSWORD: test
+    volumes:
+      - ./sql/entry.sql:/docker-entrypoint-initdb.d/entry.sql
 
   api:
     build: ./api

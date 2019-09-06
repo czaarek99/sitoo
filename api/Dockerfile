@@ -1,8 +1,8 @@
-FROM "golang:1.13"
+FROM "golang:1.12"
 
 WORKDIR /app
 
-COPY /api /app/api
+COPY . /app
 
 RUN go mod download
 

@@ -1,13 +1,13 @@
 package main
 
 import (
-	"database/sql"
-	"log"
-	"net/http"
 	"api/repositories"
 	"api/servers"
 	"api/services"
 	"api/util"
+	"database/sql"
+	"log"
+	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -17,7 +17,7 @@ import (
 func main() {
 	log.Println("Starting server")
 
-	connection, err := sql.Open("mysql", "root:@/sitoo_test_assignment")
+	connection, err := sql.Open("mysql", "sitoo:test@database/sitoo_test_assignment")
 
 	if err != nil {
 		log.Fatal("Could not connect to database")
