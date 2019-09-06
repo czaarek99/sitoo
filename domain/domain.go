@@ -82,7 +82,6 @@ type ProductRepository interface {
 	GetBarcodes(barcodes []string) ([]ProductBarcode, error)
 	GetSku(sku string) (*ProductSku, error)
 	ProductExists(id ProductId) (bool, error)
-	AttributesExist(id ProductId, attributes []ProductAttribute) (bool, error)
 }
 
 type ErrorResponse struct {
