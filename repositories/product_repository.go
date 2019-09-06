@@ -135,13 +135,13 @@ func (repo ProductRepositoryImpl) GetProducts(
 
 	if sku != "" {
 		query = query.Where(sq.Eq{
-			"sku": sku,
+			"product.sku": sku,
 		})
 	}
 
 	if barcode != "" {
 		query = query.Where(sq.Eq{
-			"barcode": barcode,
+			"product_barcode.barcode": barcode,
 		})
 	}
 
