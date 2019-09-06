@@ -95,13 +95,13 @@ func parseGET(request *http.Request) parsedGET {
 		query := request.URL.Query()
 		start, err := strconv.ParseUint(query.Get("start"), 10, 64)
 
-		if err != nil {
+		if err == nil {
 			parsed.start = start
 		}
 
 		num, numErr := strconv.ParseUint(query.Get("num"), 10, 64)
 
-		if numErr != nil {
+		if numErr == nil {
 			parsed.num = num
 		}
 
