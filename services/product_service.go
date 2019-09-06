@@ -32,13 +32,17 @@ func getAttributeHash(attribute domain.ProductAttribute) string {
 	return attributeHash.String()
 }
 
-func (service ProductServiceImpl) validateBarcodesAreUnique(
+func (service ProductServiceImpl) validateBarcodes(
 	barcodes []string,
 ) error {
 
 	barcodeSet := map[string]struct{}{}
 
 	for _, barcode := range barcodes {
+		if len(barcode) > 32 {
+			return fmt.Errorf("Barcode (%s) is longer than max of 32 characters", barcode)
+		}
+
 		barcodeSet[barcode] = struct{}{}
 	}
 
@@ -145,7 +149,7 @@ func (service ProductServiceImpl) AddProduct(
 	}
 
 	if len(product.Barcodes) > 0 {
-		err := service.validateBarcodesAreUnique(product.Barcodes)
+		err := service.validateBarcodes(product.Barcodes)
 
 		if err != nil {
 			return 0, err
@@ -209,7 +213,7 @@ func (service ProductServiceImpl) UpdateProduct(
 	}
 
 	if len(product.Barcodes) > 0 {
-		err := service.validateBarcodesAreUnique(product.Barcodes)
+		err := service.validateBarcodes(product.Barcodes)
 
 		if err != nil {
 			return err
