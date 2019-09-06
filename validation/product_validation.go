@@ -135,6 +135,30 @@ func validatePrice(price string) error {
 	return nil
 }
 
+func ValidateFields(fields []string) error {
+	allowedFields := map[string]struct{}{}
+
+	allowedFields["productId"] = struct{}{}
+	allowedFields["title"] = struct{}{}
+	allowedFields["sku"] = struct{}{}
+	allowedFields["barcodes"] = struct{}{}
+	allowedFields["description"] = struct{}{}
+	allowedFields["attributes"] = struct{}{}
+	allowedFields["price"] = struct{}{}
+	allowedFields["created"] = struct{}{}
+	allowedFields["lastUpdated"] = struct{}{}
+
+	for _, field := range fields {
+		_, ok := allowedFields[field]
+
+		if !ok {
+			return fmt.Errorf("Unknown field (%s) field list", field)
+		}
+	}
+
+	return nil
+}
+
 func ValidateProductUpdate(changes domain.ProductUpdateInput) error {
 
 	if changes.Title != nil {

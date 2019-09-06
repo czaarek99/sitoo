@@ -21,6 +21,12 @@ func (service ProductServiceImpl) GetProducts(
 
 	log.Println("Requesting multiple products")
 
+	err := validation.ValidateFields(fields)
+
+	if err != nil {
+		return nil, 0, err
+	}
+
 	if num == 0 {
 		num = 10
 	}
@@ -39,6 +45,12 @@ func (service ProductServiceImpl) GetProduct(
 	id domain.ProductId,
 	fields []string,
 ) (*domain.Product, error) {
+
+	err := validation.ValidateFields(fields)
+
+	if err != nil {
+		return nil, err
+	}
 
 	log.Println("Requesting single product")
 
