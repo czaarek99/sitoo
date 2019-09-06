@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+//TODO: Validate too long and too short strings
+
 type ProductServiceImpl struct {
 	Repo domain.ProductRepository
 }
@@ -47,13 +49,21 @@ func (service ProductServiceImpl) validateBarcodesAreUnique(
 	return nil
 }
 
-func (service ProductServiceImpl) validateAttributesAreUnique(
+func (service ProductServiceImpl) validateAttributes(
 	attributes []domain.ProductAttribute,
 ) error {
 
 	attributeSet := map[string]struct{}{}
 
 	for _, attribute := range attributes {
+		if len(attribute.Name) > 16 {
+			return errors.New("Attribute name too long")
+		}
+
+		if len(attribute.Value) > 32 {
+			return errors.New("Attribute value too long")
+		}
+
 		hash := getAttributeHash(attribute)
 		attributeSet[hash] = struct{}{}
 	}
@@ -127,7 +137,7 @@ func (service ProductServiceImpl) AddProduct(
 	}
 
 	if len(product.Attributes) > 0 {
-		err := service.validateAttributesAreUnique(product.Attributes)
+		err := service.validateAttributes(product.Attributes)
 
 		if err != nil {
 			return 0, err
@@ -191,7 +201,7 @@ func (service ProductServiceImpl) UpdateProduct(
 	}
 
 	if len(product.Attributes) > 0 {
-		err := service.validateAttributesAreUnique(product.Attributes)
+		err := service.validateAttributes(product.Attributes)
 
 		if err != nil {
 			return err
