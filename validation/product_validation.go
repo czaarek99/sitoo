@@ -34,44 +34,151 @@ func HandleDatabaseError(err error) {
 	log.Println(err.Error())
 }
 
-func ValidateBarcodes(barcodes []string) error {
+func validateBarcodes(barcodes []string) error {
 
-	barcodeSet := map[string]struct{}{}
+	if len(barcodes) > 0 {
+		barcodeSet := map[string]struct{}{}
 
-	for _, barcode := range barcodes {
-		if len(barcode) > 32 {
-			return fmt.Errorf("Barcode (%s) is longer than max of 32 characters", barcode)
+		for _, barcode := range barcodes {
+			if len(barcode) > 32 {
+				return fmt.Errorf("Barcode (%s) is longer than max of 32 characters", barcode)
+			}
+
+			barcodeSet[barcode] = struct{}{}
 		}
 
-		barcodeSet[barcode] = struct{}{}
-	}
-
-	if len(barcodeSet) < len(barcodes) {
-		return GetBarcodesNotUniqueError()
+		if len(barcodeSet) < len(barcodes) {
+			return GetBarcodesNotUniqueError()
+		}
 	}
 
 	return nil
 }
 
-func ValidateAttributes(attributes []domain.ProductAttribute) error {
+func validateAttributes(attributes []domain.ProductAttribute) error {
 
-	attributeSet := map[string]struct{}{}
+	if len(attributes) > 0 {
+		attributeSet := map[string]struct{}{}
 
-	for _, attribute := range attributes {
-		if len(attribute.Name) > 16 {
-			return fmt.Errorf("Attribute name (%s) is longer than max of 16 characters", attribute.Name)
+		for _, attribute := range attributes {
+			if len(attribute.Name) > 16 {
+				return fmt.Errorf("Attribute name (%s) is longer than max of 16 characters", attribute.Name)
+			}
+
+			if len(attribute.Value) > 32 {
+				return fmt.Errorf("Attribute value (%s) is longer than max of 32 characters", attribute.Value)
+			}
+
+			hash := getAttributeHash(attribute)
+			attributeSet[hash] = struct{}{}
 		}
 
-		if len(attribute.Value) > 32 {
-			return fmt.Errorf("Attribute value (%s) is longer than max of 32 characters", attribute.Value)
+		if len(attributeSet) < len(attributes) {
+			return errors.New("Attributes not unique")
 		}
-
-		hash := getAttributeHash(attribute)
-		attributeSet[hash] = struct{}{}
 	}
 
-	if len(attributeSet) < len(attributes) {
-		return errors.New("Attributes not unique")
+	return nil
+}
+
+func validateTitle(title string) error {
+	if len(title) > 32 {
+		return fmt.Errorf("Product title (%s) is longer than max of 32 characters", title)
+	}
+
+	return nil
+}
+
+func validateSku(sku string) error {
+	if len(sku) > 32 {
+		return fmt.Errorf("Product sku (%s) is longer than max of 32 characters", sku)
+	}
+
+	return nil
+}
+
+func validateDescription(description string) error {
+	if len(description) > 1024 {
+		return fmt.Errorf("Product description (%s) is longer than max of 32 characters", description)
+	}
+
+	return nil
+}
+
+func ValidateProductUpdate(changes domain.ProductUpdateInput) error {
+
+	if changes.Title != nil {
+
+		err := validateTitle(*changes.Title)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	if changes.Sku != nil {
+		err := validateSku(*changes.Sku)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	if changes.Description != nil {
+		err := validateDescription(*changes.Description)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	err := validateBarcodes(changes.Barcodes)
+
+	if err != nil {
+		return err
+	}
+
+	err = validateAttributes(changes.Attributes)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ValidateNewProduct(product domain.ProductAddInput) error {
+
+	err := validateTitle(product.Title)
+
+	if err != nil {
+		return err
+	}
+
+	err = validateSku(product.Sku)
+
+	if err != nil {
+		return err
+	}
+
+	if product.Description != nil {
+		err := validateDescription(*product.Description)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	err = validateBarcodes(product.Barcodes)
+
+	if err != nil {
+		return err
+	}
+
+	err = validateAttributes(product.Attributes)
+
+	if err != nil {
+		return err
 	}
 
 	return nil

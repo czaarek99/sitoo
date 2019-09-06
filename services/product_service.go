@@ -63,6 +63,12 @@ func (service ProductServiceImpl) AddProduct(
 
 	log.Println("Adding product")
 
+	err := validation.ValidateNewProduct(product)
+
+	if err != nil {
+		return 0, err
+	}
+
 	productSku, err := service.Repo.GetSku(product.Sku)
 
 	if err != nil {
@@ -74,21 +80,7 @@ func (service ProductServiceImpl) AddProduct(
 		return 0, validation.GetSkuAlreadyExistsError(product.Sku)
 	}
 
-	if len(product.Attributes) > 0 {
-		err := validation.ValidateAttributes(product.Attributes)
-
-		if err != nil {
-			return 0, err
-		}
-	}
-
 	if len(product.Barcodes) > 0 {
-		err := validation.ValidateBarcodes(product.Barcodes)
-
-		if err != nil {
-			return 0, err
-		}
-
 		barcodes, err := service.Repo.GetBarcodes(product.Barcodes)
 
 		if err != nil {
@@ -126,6 +118,12 @@ func (service ProductServiceImpl) UpdateProduct(
 		return fmt.Errorf("Can't find product %v", id)
 	}
 
+	err = validation.ValidateProductUpdate(product)
+
+	if err != nil {
+		return err
+	}
+
 	if product.Sku != nil {
 		productSku, err := service.Repo.GetSku(*product.Sku)
 
@@ -138,21 +136,7 @@ func (service ProductServiceImpl) UpdateProduct(
 		}
 	}
 
-	if len(product.Attributes) > 0 {
-		err := validation.ValidateAttributes(product.Attributes)
-
-		if err != nil {
-			return err
-		}
-	}
-
 	if len(product.Barcodes) > 0 {
-		err := validation.ValidateBarcodes(product.Barcodes)
-
-		if err != nil {
-			return err
-		}
-
 		barcodes, err := service.Repo.GetBarcodes(product.Barcodes)
 
 		if err != nil {
