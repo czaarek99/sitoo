@@ -9,6 +9,9 @@ import (
 	"strings"
 )
 
+//TODO: More logs
+//TODO: Don't leak normal logs
+
 const (
 	singleGET   = iota
 	multipleGET = iota
@@ -28,9 +31,6 @@ type parsedGET struct {
 	barcode string
 	fields  []string
 }
-
-//TODO: More logs
-//TODO: Don't leak normal logs
 
 func getBadRequestResponse(text string) domain.ErrorResponse {
 	return domain.ErrorResponse{
