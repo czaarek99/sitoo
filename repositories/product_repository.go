@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"database/sql"
-	"fmt"
 	"sitoo/domain"
 	"strconv"
 	"strings"
@@ -100,8 +99,6 @@ func rowsToProducts(rows *sql.Rows) ([]domain.Product, uint32, error) {
 		if err != nil {
 			return nil, 0, err
 		}
-
-		fmt.Println(created)
 
 		productEntity.Created, err = convertSQLDateToTimestamp(created)
 
