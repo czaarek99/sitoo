@@ -49,7 +49,7 @@ func (service ProductServiceImpl) GetProducts(
 func (service ProductServiceImpl) GetProduct(
 	id domain.ProductId,
 	fields []string,
-) (domain.Product, error) {
+) (*domain.Product, error) {
 
 	log.Println("Requesting single product")
 
@@ -57,10 +57,10 @@ func (service ProductServiceImpl) GetProduct(
 
 	if err != nil {
 		handleDatabaseError(err)
-		return product, getGenericDatabaseError()
+		return nil, getGenericDatabaseError()
 	} else if !exists {
 		newErr := errors.New(fmt.Sprintf("Can't find product %v", id))
-		return product, newErr
+		return nil, newErr
 	}
 
 	return product, nil

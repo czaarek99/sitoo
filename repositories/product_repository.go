@@ -233,7 +233,7 @@ func (repo ProductRepositoryImpl) GetProducts(
 func (repo ProductRepositoryImpl) GetProduct(
 	id domain.ProductId,
 	fields []string,
-) (domain.Product, bool, error) {
+) (*domain.Product, bool, error) {
 
 	predicate := sq.Eq{
 		"product_id": id,
@@ -255,13 +255,13 @@ func (repo ProductRepositoryImpl) GetProduct(
 	defer rows.Close()
 
 	if err != nil {
-		return domain.Product{}, false, err
+		return nil, false, err
 	}
 
 	exists := rows.Next()
 
 	if !exists {
-		return domain.Product{}, false, nil
+		return nil, false, nil
 	}
 
 	product := domain.Product{}
@@ -280,14 +280,14 @@ func (repo ProductRepositoryImpl) GetProduct(
 	)
 
 	if err != nil {
-		return domain.Product{}, false, err
+		return nil, false, err
 	}
 
 	if lastUpdated != nil {
 		lastUpdatedTimestamp, err := convertSQLDateToTimestamp(*lastUpdated)
 
 		if err != nil {
-			return domain.Product{}, false, err
+			return nil, false, err
 		}
 
 		product.LastUpdated = &lastUpdatedTimestamp
@@ -296,7 +296,7 @@ func (repo ProductRepositoryImpl) GetProduct(
 	product.Created, err = convertSQLDateToTimestamp(created)
 
 	if err != nil {
-		return domain.Product{}, false, err
+		return nil, false, err
 	}
 
 	barcodeRows, err := sq.Select("barcode").
@@ -308,7 +308,7 @@ func (repo ProductRepositoryImpl) GetProduct(
 	defer barcodeRows.Close()
 
 	if err != nil {
-		return domain.Product{}, false, err
+		return nil, false, err
 	}
 
 	for barcodeRows.Next() {
@@ -317,7 +317,7 @@ func (repo ProductRepositoryImpl) GetProduct(
 		err := barcodeRows.Scan(&barcode)
 
 		if err != nil {
-			return domain.Product{}, false, err
+			return nil, false, err
 		}
 
 		product.Barcodes = append(product.Barcodes, barcode)
@@ -332,7 +332,7 @@ func (repo ProductRepositoryImpl) GetProduct(
 	defer attributeRows.Close()
 
 	if err != nil {
-		return domain.Product{}, false, err
+		return nil, false, err
 	}
 
 	for attributeRows.Next() {
@@ -342,7 +342,7 @@ func (repo ProductRepositoryImpl) GetProduct(
 		err := attributeRows.Scan(&name, &value)
 
 		if err != nil {
-			return domain.Product{}, false, err
+			return nil, false, err
 		}
 
 		product.Attributes = append(product.Attributes, domain.ProductAttribute{
@@ -351,7 +351,7 @@ func (repo ProductRepositoryImpl) GetProduct(
 		})
 	}
 
-	return product, true, nil
+	return &product, true, nil
 }
 
 func (repo ProductRepositoryImpl) AddProduct(
