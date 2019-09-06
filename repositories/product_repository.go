@@ -152,6 +152,10 @@ func (repo ProductRepositoryImpl) GetProducts(
 	fields []string,
 ) ([]domain.Product, uint32, error) {
 
+	countQuery := sq.Select("count(*)").
+		From("product").
+		LeftJoin("product_barcode USING (product_id)")
+
 	query := sq.Select(
 		"product.product_id",
 		"product.title",
@@ -167,15 +171,21 @@ func (repo ProductRepositoryImpl) GetProducts(
 		Offset(start)
 
 	if sku != "" {
-		query = query.Where(sq.Eq{
+		predicate := sq.Eq{
 			"product.sku": sku,
-		})
+		}
+
+		query = query.Where(predicate)
+		countQuery = countQuery.Where(predicate)
 	}
 
 	if barcode != "" {
-		query = query.Where(sq.Eq{
+		predicate := sq.Eq{
 			"product_barcode.barcode": barcode,
-		})
+		}
+
+		query = query.Where(predicate)
+		countQuery = countQuery.Where(predicate)
 	}
 
 	rows, err := query.RunWith(repo.DB).Query()
@@ -283,8 +293,13 @@ func (repo ProductRepositoryImpl) GetProducts(
 		}
 	}
 
-	//TODO: Include filter in count
-	count, err := repo.count("SELECT COUNT(*) as count FROM product")
+	countQueryString, args, err := countQuery.ToSql()
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	count, err := repo.count(countQueryString, args...)
 
 	if err != nil {
 		return nil, 0, err
