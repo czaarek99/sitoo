@@ -1,90 +1,16 @@
 package services
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"sitoo/domain"
-	"strings"
+	"sitoo/validation"
 )
 
 //TODO: Validate too long and too short strings
 
 type ProductServiceImpl struct {
 	Repo domain.ProductRepository
-}
-
-func getGenericDatabaseError() error {
-	return errors.New("Database error")
-}
-
-func getBarcodesNotUniqueError() error {
-	return errors.New("Barcodes not unique")
-}
-
-func getSkuAlreadyExistsError(sku string) error {
-	return fmt.Errorf("SKU '%s' already exists", sku)
-}
-
-func handleDatabaseError(err error) {
-	log.Println("Database error:")
-	log.Println(err.Error())
-}
-
-func getAttributeHash(attribute domain.ProductAttribute) string {
-	attributeHash := strings.Builder{}
-	attributeHash.WriteString(attribute.Name)
-	attributeHash.WriteString("_")
-	attributeHash.WriteString(attribute.Value)
-
-	return attributeHash.String()
-}
-
-func (service ProductServiceImpl) validateBarcodes(
-	barcodes []string,
-) error {
-
-	barcodeSet := map[string]struct{}{}
-
-	for _, barcode := range barcodes {
-		if len(barcode) > 32 {
-			return fmt.Errorf("Barcode (%s) is longer than max of 32 characters", barcode)
-		}
-
-		barcodeSet[barcode] = struct{}{}
-	}
-
-	if len(barcodeSet) < len(barcodes) {
-		return getBarcodesNotUniqueError()
-	}
-
-	return nil
-}
-
-func (service ProductServiceImpl) validateAttributes(
-	attributes []domain.ProductAttribute,
-) error {
-
-	attributeSet := map[string]struct{}{}
-
-	for _, attribute := range attributes {
-		if len(attribute.Name) > 16 {
-			return fmt.Errorf("Attribute name (%s) is longer than max of 16 characters", attribute.Name)
-		}
-
-		if len(attribute.Value) > 32 {
-			return fmt.Errorf("Attribute value (%s) is longer than max of 32 characters", attribute.Value)
-		}
-
-		hash := getAttributeHash(attribute)
-		attributeSet[hash] = struct{}{}
-	}
-
-	if len(attributeSet) < len(attributes) {
-		return errors.New("Attributes not unique")
-	}
-
-	return nil
 }
 
 func (service ProductServiceImpl) GetProducts(
@@ -104,8 +30,8 @@ func (service ProductServiceImpl) GetProducts(
 	products, count, err := service.Repo.GetProducts(start, num, sku, barcode, fields)
 
 	if err != nil {
-		handleDatabaseError(err)
-		return nil, 0, getGenericDatabaseError()
+		validation.HandleDatabaseError(err)
+		return nil, 0, validation.GetGenericDatabaseError()
 	}
 
 	return products, count, nil
@@ -121,8 +47,8 @@ func (service ProductServiceImpl) GetProduct(
 	product, exists, err := service.Repo.GetProduct(id, fields)
 
 	if err != nil {
-		handleDatabaseError(err)
-		return nil, getGenericDatabaseError()
+		validation.HandleDatabaseError(err)
+		return nil, validation.GetGenericDatabaseError()
 	} else if !exists {
 		newErr := fmt.Errorf("Can't find product %v", id)
 		return nil, newErr
@@ -140,16 +66,16 @@ func (service ProductServiceImpl) AddProduct(
 	productSku, err := service.Repo.GetSku(product.Sku)
 
 	if err != nil {
-		handleDatabaseError(err)
-		return 0, getGenericDatabaseError()
+		validation.HandleDatabaseError(err)
+		return 0, validation.GetGenericDatabaseError()
 	}
 
 	if productSku != nil {
-		return 0, getSkuAlreadyExistsError(product.Sku)
+		return 0, validation.GetSkuAlreadyExistsError(product.Sku)
 	}
 
 	if len(product.Attributes) > 0 {
-		err := service.validateAttributes(product.Attributes)
+		err := validation.ValidateAttributes(product.Attributes)
 
 		if err != nil {
 			return 0, err
@@ -157,7 +83,7 @@ func (service ProductServiceImpl) AddProduct(
 	}
 
 	if len(product.Barcodes) > 0 {
-		err := service.validateBarcodes(product.Barcodes)
+		err := validation.ValidateBarcodes(product.Barcodes)
 
 		if err != nil {
 			return 0, err
@@ -170,15 +96,15 @@ func (service ProductServiceImpl) AddProduct(
 		}
 
 		if len(barcodes) > 0 {
-			return 0, getBarcodesNotUniqueError()
+			return 0, validation.GetBarcodesNotUniqueError()
 		}
 	}
 
 	id, err := service.Repo.AddProduct(product)
 
 	if err != nil {
-		handleDatabaseError(err)
-		return 0, getGenericDatabaseError()
+		validation.HandleDatabaseError(err)
+		return 0, validation.GetGenericDatabaseError()
 	}
 
 	return id, nil
@@ -192,8 +118,8 @@ func (service ProductServiceImpl) UpdateProduct(
 	exists, err := service.Repo.ProductExists(id)
 
 	if err != nil {
-		handleDatabaseError(err)
-		return getGenericDatabaseError()
+		validation.HandleDatabaseError(err)
+		return validation.GetGenericDatabaseError()
 	}
 
 	if !exists {
@@ -208,11 +134,12 @@ func (service ProductServiceImpl) UpdateProduct(
 		}
 
 		if productSku != nil && productSku.ProductID != id {
-			return getSkuAlreadyExistsError(*product.Sku)
+			return validation.GetSkuAlreadyExistsError(*product.Sku)
 		}
 	}
+
 	if len(product.Attributes) > 0 {
-		err := service.validateAttributes(product.Attributes)
+		err := validation.ValidateAttributes(product.Attributes)
 
 		if err != nil {
 			return err
@@ -220,7 +147,7 @@ func (service ProductServiceImpl) UpdateProduct(
 	}
 
 	if len(product.Barcodes) > 0 {
-		err := service.validateBarcodes(product.Barcodes)
+		err := validation.ValidateBarcodes(product.Barcodes)
 
 		if err != nil {
 			return err
@@ -234,7 +161,7 @@ func (service ProductServiceImpl) UpdateProduct(
 
 		for _, barcode := range barcodes {
 			if barcode.ProductID != id {
-				return getBarcodesNotUniqueError()
+				return validation.GetBarcodesNotUniqueError()
 			}
 		}
 	}
@@ -244,8 +171,8 @@ func (service ProductServiceImpl) UpdateProduct(
 	err = service.Repo.UpdateProduct(id, product)
 
 	if err != nil {
-		handleDatabaseError(err)
-		return getGenericDatabaseError()
+		validation.HandleDatabaseError(err)
+		return validation.GetGenericDatabaseError()
 	}
 
 	return nil
@@ -258,8 +185,8 @@ func (service ProductServiceImpl) DeleteProduct(
 	exists, err := service.Repo.ProductExists(id)
 
 	if err != nil {
-		handleDatabaseError(err)
-		return getGenericDatabaseError()
+		validation.HandleDatabaseError(err)
+		return validation.GetGenericDatabaseError()
 	}
 
 	if !exists {
@@ -269,8 +196,8 @@ func (service ProductServiceImpl) DeleteProduct(
 	err = service.Repo.DeleteProduct(id)
 
 	if err != nil {
-		handleDatabaseError(err)
-		return getGenericDatabaseError()
+		validation.HandleDatabaseError(err)
+		return validation.GetGenericDatabaseError()
 	}
 
 	return nil
