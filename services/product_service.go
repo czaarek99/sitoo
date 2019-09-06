@@ -7,8 +7,6 @@ import (
 	"sitoo/validation"
 )
 
-//TODO: Validate too long and too short strings
-
 type ProductServiceImpl struct {
 	Repo domain.ProductRepository
 }
