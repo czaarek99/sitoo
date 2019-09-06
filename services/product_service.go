@@ -83,6 +83,20 @@ func (service ProductServiceImpl) AddProduct(
 		return 0, errors.New(fmt.Sprintf("SKU '%s' already exists", product.Sku))
 	}
 
+	if len(product.Barcodes) > 0 {
+		exists, err := service.Repo.BarcodesExist(product.Barcodes)
+
+		if err != nil {
+			handleDatabaseError(err)
+			return 0, getGenericDatabaseError()
+		}
+
+		if exists {
+			return 0, errors.New("Barcodes not unique")
+		}
+
+	}
+
 	id, err := service.Repo.AddProduct(product)
 
 	if err != nil {

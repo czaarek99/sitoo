@@ -526,11 +526,23 @@ func (repo ProductRepositoryImpl) SkuExists(
 	return count > 0, nil
 }
 
-func (repo ProductRepositoryImpl) BarcodeExists(
-	barcode string,
+func (repo ProductRepositoryImpl) BarcodesExist(
+	barcodes []string,
 ) (bool, error) {
 
-	count, err := repo.count("SELECT COUNT(*) as count FROM product_barcode WHERE barcode = ?", barcode)
+	query := sq.Select("count(*) as count").From("product_barcode")
+
+	for barcode := range barcodes {
+		query = query.Where("barcode", barcode)
+	}
+
+	queryString, args, err := query.ToSql()
+
+	if err != nil {
+		return false, err
+	}
+
+	count, err := repo.count(queryString, args...)
 
 	if err != nil {
 		return false, err
