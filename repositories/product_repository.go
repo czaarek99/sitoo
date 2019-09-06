@@ -598,17 +598,39 @@ func (repo ProductRepositoryImpl) ProductExists(
 	return count > 0, nil
 }
 
-func (repo ProductRepositoryImpl) SkuExists(
+func (repo ProductRepositoryImpl) GetSku(
 	sku string,
-) (bool, error) {
+) (*domain.ProductSku, error) {
 
-	count, err := repo.count("SELECT COUNT(*) as count FROM product WHERE sku = ?", sku)
-
-	if err != nil {
-		return false, err
+	predicate := sq.Eq{
+		"sku": sku,
 	}
 
-	return count > 0, nil
+	rows, err := sq.Select("product_id", "sku").
+		From("product").
+		Where(predicate).
+		RunWith(repo.DB).
+		Query()
+
+	if err != nil {
+		return nil, err
+	}
+
+	exists := rows.Next()
+
+	if !exists {
+		return nil, nil
+	}
+
+	productSku := domain.ProductSku{}
+
+	err = rows.Scan(&productSku.ProductID, &productSku.Sku)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &productSku, nil
 }
 
 func (repo ProductRepositoryImpl) GetBarcodes(

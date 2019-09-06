@@ -89,14 +89,14 @@ func (service ProductServiceImpl) AddProduct(
 
 	log.Println("Adding product")
 
-	exists, err := service.Repo.SkuExists(product.Sku)
+	productSku, err := service.Repo.GetSku(product.Sku)
 
 	if err != nil {
 		handleDatabaseError(err)
 		return 0, getGenericDatabaseError()
 	}
 
-	if exists {
+	if productSku != nil {
 		return 0, errors.New(fmt.Sprintf("SKU '%s' already exists", product.Sku))
 	}
 
@@ -142,6 +142,18 @@ func (service ProductServiceImpl) UpdateProduct(
 
 	if !exists {
 		return errors.New(fmt.Sprintf("Can't find product %v", id))
+	}
+
+	if product.Sku != nil {
+		productSku, err := service.Repo.GetSku(*product.Sku)
+
+		if err != nil {
+			return err
+		}
+
+		if productSku != nil && productSku.ProductID != id {
+			return errors.New(fmt.Sprintf("SKU '%s' already exists", product.Sku))
+		}
 	}
 
 	if len(product.Barcodes) > 0 {
