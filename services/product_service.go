@@ -18,6 +18,14 @@ func getGenericDatabaseError() error {
 	return errors.New("Database error")
 }
 
+func getBarcodesNotUniqueError() error {
+	return errors.New("Barcodes not unique")
+}
+
+func getSkuAlreadyExistsError(sku string) error {
+	return fmt.Errorf("SKU '%s' already exists", sku)
+}
+
 func handleDatabaseError(err error) {
 	log.Println("Database error:")
 	log.Println(err.Error())
@@ -47,7 +55,7 @@ func (service ProductServiceImpl) validateBarcodes(
 	}
 
 	if len(barcodeSet) < len(barcodes) {
-		return errors.New("Barcodes not unique")
+		return getBarcodesNotUniqueError()
 	}
 
 	return nil
@@ -137,7 +145,7 @@ func (service ProductServiceImpl) AddProduct(
 	}
 
 	if productSku != nil {
-		return 0, fmt.Errorf("SKU '%s' already exists", product.Sku)
+		return 0, getSkuAlreadyExistsError(product.Sku)
 	}
 
 	if len(product.Attributes) > 0 {
@@ -162,7 +170,7 @@ func (service ProductServiceImpl) AddProduct(
 		}
 
 		if len(barcodes) > 0 {
-			return 0, errors.New("Barcodes not unique")
+			return 0, getBarcodesNotUniqueError()
 		}
 	}
 
@@ -200,7 +208,7 @@ func (service ProductServiceImpl) UpdateProduct(
 		}
 
 		if productSku != nil && productSku.ProductID != id {
-			return fmt.Errorf("SKU '%s' already exists", *product.Sku)
+			return getSkuAlreadyExistsError(*product.Sku)
 		}
 	}
 	if len(product.Attributes) > 0 {
@@ -226,7 +234,7 @@ func (service ProductServiceImpl) UpdateProduct(
 
 		for _, barcode := range barcodes {
 			if barcode.ProductID != id {
-				return errors.New("Barcodes not unique")
+				return getBarcodesNotUniqueError()
 			}
 		}
 	}
