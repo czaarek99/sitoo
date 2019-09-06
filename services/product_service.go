@@ -22,6 +22,23 @@ func handleDatabaseError(err error) {
 	log.Println(err.Error())
 }
 
+func (service ProductServiceImpl) validateBarcodesAreUnique(
+	barcodes []string,
+) error {
+	exists, err := service.Repo.BarcodesExist(barcodes)
+
+	if err != nil {
+		handleDatabaseError(err)
+		return getGenericDatabaseError()
+	}
+
+	if exists {
+		return errors.New("Barcodes not unique")
+	}
+
+	return nil
+}
+
 func (service ProductServiceImpl) GetProducts(
 	start uint64,
 	num uint64,
@@ -84,17 +101,11 @@ func (service ProductServiceImpl) AddProduct(
 	}
 
 	if len(product.Barcodes) > 0 {
-		exists, err := service.Repo.BarcodesExist(product.Barcodes)
+		err = service.validateBarcodesAreUnique(product.Barcodes)
 
 		if err != nil {
-			handleDatabaseError(err)
-			return 0, getGenericDatabaseError()
+			return 0, err
 		}
-
-		if exists {
-			return 0, errors.New("Barcodes not unique")
-		}
-
 	}
 
 	id, err := service.Repo.AddProduct(product)
@@ -124,15 +135,10 @@ func (service ProductServiceImpl) UpdateProduct(
 	}
 
 	if len(product.Barcodes) > 0 {
-		exists, err := service.Repo.BarcodesExist(product.Barcodes)
+		err = service.validateBarcodesAreUnique(product.Barcodes)
 
 		if err != nil {
-			handleDatabaseError(err)
-			return getGenericDatabaseError()
-		}
-
-		if exists {
-			return errors.New("Barcodes not unique")
+			return err
 		}
 	}
 
