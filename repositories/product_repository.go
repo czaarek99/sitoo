@@ -16,6 +16,7 @@ type ProductRepositoryImpl struct {
 }
 
 //TODO: Handle fields in database
+
 func (repo ProductRepositoryImpl) getTotalCount() (uint32, error) {
 	count, err := repo.count("SELECT COUNT(*) as count FROM product")
 	return count, err
@@ -65,7 +66,6 @@ func convertSQLDateToTimestamp(date string) (int64, error) {
 	return createdTime.Unix(), nil
 }
 
-//TODO: Refactor and just make 3 queries instead
 func rowsToProducts(rows *sql.Rows) ([]domain.Product, uint32, error) {
 	results := make([]domain.Product, 0)
 
@@ -174,11 +174,6 @@ func rowsToProducts(rows *sql.Rows) ([]domain.Product, uint32, error) {
 	return results, rowCount, nil
 }
 
-/*
-Could be optimized to use 3 queries instead of one.
-That adds a lot of complexity to the problem so we'll
-skip that here.
-*/
 func (repo ProductRepositoryImpl) GetProducts(
 	start uint64,
 	num uint64,
