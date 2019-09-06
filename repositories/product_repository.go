@@ -11,11 +11,10 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
+//TODO: Handle fields in database
 type ProductRepositoryImpl struct {
 	DB *sql.DB
 }
-
-//TODO: Handle fields in database
 
 func (repo ProductRepositoryImpl) count(
 	query string,
@@ -445,7 +444,6 @@ func (repo ProductRepositoryImpl) AddProduct(
 	return productID, nil
 }
 
-//TODO: Explain why we ignore a sku of nil later
 func (repo ProductRepositoryImpl) UpdateProduct(
 	id domain.ProductId,
 	product domain.ProductUpdateInput,
