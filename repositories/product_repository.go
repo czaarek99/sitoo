@@ -59,6 +59,46 @@ func convertSQLDateToTimestamp(date string) (int64, error) {
 	return createdTime.Unix(), nil
 }
 
+func rowToProduct(rows *sql.Rows) (*domain.Product, error) {
+	product := domain.Product{}
+
+	rows.Scan()
+	var created string
+	var lastUpdated *string
+
+	err := rows.Scan(
+		&product.ProductID,
+		&product.Title,
+		&product.Sku,
+		&product.Description,
+		&product.Price,
+		&created,
+		&lastUpdated,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if lastUpdated != nil {
+		lastUpdatedTimestamp, err := convertSQLDateToTimestamp(*lastUpdated)
+
+		if err != nil {
+			return nil, err
+		}
+
+		product.LastUpdated = &lastUpdatedTimestamp
+	}
+
+	product.Created, err = convertSQLDateToTimestamp(created)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &product, nil
+}
+
 func (repo ProductRepositoryImpl) GetProducts(
 	start uint64,
 	num uint64,
@@ -109,37 +149,7 @@ func (repo ProductRepositoryImpl) GetProducts(
 	inBuilder.WriteString("product_id IN(")
 
 	for rows.Next() {
-		product := domain.Product{}
-
-		rows.Scan()
-		var created string
-		var lastUpdated *string
-
-		err = rows.Scan(
-			&product.ProductID,
-			&product.Title,
-			&product.Sku,
-			&product.Description,
-			&product.Price,
-			&created,
-			&lastUpdated,
-		)
-
-		if err != nil {
-			return nil, 0, err
-		}
-
-		if lastUpdated != nil {
-			lastUpdatedTimestamp, err := convertSQLDateToTimestamp(*lastUpdated)
-
-			if err != nil {
-				return nil, 0, err
-			}
-
-			product.LastUpdated = &lastUpdatedTimestamp
-		}
-
-		product.Created, err = convertSQLDateToTimestamp(created)
+		product, err := rowToProduct(rows)
 
 		if err != nil {
 			return nil, 0, err
@@ -151,7 +161,7 @@ func (repo ProductRepositoryImpl) GetProducts(
 		prefix = ","
 		inBuilder.WriteString(idString)
 
-		productsMap[product.ProductID] = product
+		productsMap[product.ProductID] = *product
 	}
 
 	inBuilder.WriteString(")")
@@ -267,36 +277,7 @@ func (repo ProductRepositoryImpl) GetProduct(
 		return nil, false, nil
 	}
 
-	product := domain.Product{}
-
-	var created string
-	var lastUpdated *string
-
-	err = rows.Scan(
-		&product.ProductID,
-		&product.Title,
-		&product.Sku,
-		&product.Description,
-		&product.Price,
-		&created,
-		&lastUpdated,
-	)
-
-	if err != nil {
-		return nil, false, err
-	}
-
-	if lastUpdated != nil {
-		lastUpdatedTimestamp, err := convertSQLDateToTimestamp(*lastUpdated)
-
-		if err != nil {
-			return nil, false, err
-		}
-
-		product.LastUpdated = &lastUpdatedTimestamp
-	}
-
-	product.Created, err = convertSQLDateToTimestamp(created)
+	product, err := rowToProduct(rows)
 
 	if err != nil {
 		return nil, false, err
@@ -354,7 +335,7 @@ func (repo ProductRepositoryImpl) GetProduct(
 		})
 	}
 
-	return &product, true, nil
+	return product, true, nil
 }
 
 func (repo ProductRepositoryImpl) AddProduct(
