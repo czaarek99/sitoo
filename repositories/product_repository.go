@@ -614,11 +614,23 @@ func (repo ProductRepositoryImpl) BarcodesExist(
 
 	query := sq.Select("count(*) as count").From("product_barcode")
 
-	for barcode := range barcodes {
-		query = query.Where("barcode", sq.Eq{
-			"barcode": barcode,
-		})
+	whereBuilder := strings.Builder{}
+	whereBuilder.WriteString("barcode IN(")
+
+	barcodesCopy := make([]interface{}, len(barcodes))
+
+	prefix := ""
+	for index, barcode := range barcodes {
+		barcodesCopy[index] = barcode
+
+		whereBuilder.WriteString(prefix)
+		prefix = ","
+		whereBuilder.WriteString("?")
 	}
+
+	whereBuilder.WriteString(")")
+
+	query = query.Where(whereBuilder.String(), barcodesCopy...)
 
 	queryString, args, err := query.ToSql()
 
