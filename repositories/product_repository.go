@@ -99,6 +99,37 @@ func rowToProduct(rows *sql.Rows) (*domain.Product, error) {
 	return &product, nil
 }
 
+func stringsToInterfaces(strings []string) []interface{} {
+
+	interfaces := make([]interface{}, len(strings))
+
+	for i := 0; i < len(strings); i++ {
+		interfaces[i] = strings[i]
+	}
+
+	return interfaces
+}
+
+func getWhereIn(
+	column string,
+	valueCount int,
+) string {
+
+	whereBuilder := strings.Builder{}
+	whereBuilder.WriteString("barcode IN(")
+
+	prefix := ""
+	for i := 0; i < valueCount; i++ {
+		whereBuilder.WriteString(prefix)
+		prefix = ","
+		whereBuilder.WriteString("?")
+	}
+
+	whereBuilder.WriteString(")")
+
+	return whereBuilder.String()
+}
+
 func (repo ProductRepositoryImpl) GetProducts(
 	start uint64,
 	num uint64,
@@ -578,37 +609,6 @@ func (repo ProductRepositoryImpl) SkuExists(
 	}
 
 	return count > 0, nil
-}
-
-func stringsToInterfaces(strings []string) []interface{} {
-
-	interfaces := make([]interface{}, len(strings))
-
-	for i := 0; i < len(strings); i++ {
-		interfaces[i] = strings[i]
-	}
-
-	return interfaces
-}
-
-func getWhereIn(
-	column string,
-	valueCount int,
-) string {
-
-	whereBuilder := strings.Builder{}
-	whereBuilder.WriteString("barcode IN(")
-
-	prefix := ""
-	for i := 0; i < valueCount; i++ {
-		whereBuilder.WriteString(prefix)
-		prefix = ","
-		whereBuilder.WriteString("?")
-	}
-
-	whereBuilder.WriteString(")")
-
-	return whereBuilder.String()
 }
 
 func (repo ProductRepositoryImpl) GetBarcodes(
