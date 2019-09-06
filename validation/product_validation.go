@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"sitoo/domain"
+	"strconv"
 	"strings"
 )
 
@@ -115,6 +116,25 @@ func validateDescription(description string) error {
 	return nil
 }
 
+func validatePrice(price string) error {
+
+	float, err := strconv.ParseFloat(price, 10)
+
+	if err != nil {
+		return fmt.Errorf("Product price (%s) is not a valid decimal", price)
+	}
+
+	if float > 10^10 {
+		return fmt.Errorf("Product price (%s) is too big", price)
+	}
+
+	if float < 0 {
+		return fmt.Errorf("Product price (%s) can not be negative", price)
+	}
+
+	return nil
+}
+
 func ValidateProductUpdate(changes domain.ProductUpdateInput) error {
 
 	if changes.Title != nil {
@@ -136,6 +156,14 @@ func ValidateProductUpdate(changes domain.ProductUpdateInput) error {
 
 	if changes.Description != nil {
 		err := validateDescription(*changes.Description)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	if changes.Price != nil {
+		err := validatePrice(*changes.Price)
 
 		if err != nil {
 			return err
@@ -173,6 +201,14 @@ func ValidateNewProduct(product domain.ProductAddInput) error {
 
 	if product.Description != nil {
 		err := validateDescription(*product.Description)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	if product.Price != nil {
+		err := validatePrice(*product.Price)
 
 		if err != nil {
 			return err

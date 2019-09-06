@@ -28,7 +28,7 @@ type ProductAddInput struct {
 	Sku         string             `json:"sku"`
 	Barcodes    []string           `json:"barcodes"`
 	Description *string            `json:"description"`
-	Price       string             `json:"price"`
+	Price       *string            `json:"price"`
 	Attributes  []ProductAttribute `json:"attributes"`
 }
 

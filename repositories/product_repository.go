@@ -354,7 +354,7 @@ func (repo ProductRepositoryImpl) AddProduct(
 	product domain.ProductAddInput,
 ) (domain.ProductId, error) {
 
-	price, err := strconv.ParseFloat(product.Price, 32)
+	price, err := strconv.ParseFloat(*product.Price, 32)
 
 	if err != nil {
 		return 0, err
