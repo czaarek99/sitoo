@@ -11,8 +11,6 @@ type ProductServiceImpl struct {
 	Repo domain.ProductRepository
 }
 
-//TODO: Throw error on non unique barcode
-
 func getGenericDatabaseError() error {
 	return errors.New("Database error")
 }
@@ -121,6 +119,19 @@ func (service ProductServiceImpl) UpdateProduct(
 
 	if !exists {
 		return errors.New(fmt.Sprintf("Can't find product %v", id))
+	}
+
+	if len(product.Barcodes) > 0 {
+		exists, err := service.Repo.BarcodesExist(product.Barcodes)
+
+		if err != nil {
+			handleDatabaseError(err)
+			return getGenericDatabaseError()
+		}
+
+		if exists {
+			return errors.New("Barcodes not unique")
+		}
 	}
 
 	log.Println("Updating product")
