@@ -12,15 +12,15 @@ type ProductAttribute struct {
 }
 
 type Product struct {
-	ProductID   ProductId          `json:"productId"`
-	Title       string             `json:"title"`
-	Sku         string             `json:"sku"`
-	Barcodes    []string           `json:"barcodes"`
-	Description *string            `json:"description"`
-	Price       string             `json:"price"`
-	Created     int64              `json:"created"`
-	LastUpdated *int64             `json:"lastUpdated"`
-	Attributes  []ProductAttribute `json:"attributes"`
+	ProductID   ProductId          `json:"productId,omitempty"`
+	Title       string             `json:"title,omitempty"`
+	Sku         string             `json:"sku,omitempty"`
+	Barcodes    []string           `json:"barcodes,omitempty"`
+	Description *string            `json:"description,omitempty"`
+	Price       string             `json:"price,omitempty"`
+	Created     int64              `json:"created,omitempty"`
+	LastUpdated *int64             `json:"lastUpdated,omitempty"`
+	Attributes  []ProductAttribute `json:"attributes,omitempty"`
 }
 
 type ProductAddInput struct {
