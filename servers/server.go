@@ -88,11 +88,12 @@ func parseGET(request *http.Request) parsedGET {
 
 	productID, err := getProductIdFromPath(request.URL.Path)
 
+	query := request.URL.Query()
+
 	if err == nil {
 		parsed.productID = domain.ProductId(productID)
 		parsed.getType = singleGET
 	} else {
-		query := request.URL.Query()
 		start, err := strconv.ParseUint(query.Get("start"), 10, 64)
 
 		if err == nil {
@@ -105,15 +106,15 @@ func parseGET(request *http.Request) parsedGET {
 			parsed.num = num
 		}
 
-		delimitedFields := query.Get("fields")
-
-		if delimitedFields != "" {
-			parsed.fields = strings.Split(delimitedFields, ",")
-		}
-
 		parsed.sku = query.Get("sku")
 		parsed.barcode = query.Get("barcode")
 		parsed.getType = multipleGET
+	}
+
+	delimitedFields := query.Get("fields")
+
+	if delimitedFields != "" {
+		parsed.fields = strings.Split(delimitedFields, ",")
 	}
 
 	return parsed

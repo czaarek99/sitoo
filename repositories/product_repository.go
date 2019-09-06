@@ -68,6 +68,10 @@ func addToScan(
 	address interface{},
 ) []interface{} {
 
+	if len(fieldMap) == 0 {
+		return append(toScan, address)
+	}
+
 	_, exists := fieldMap[field]
 
 	if exists {
@@ -75,6 +79,26 @@ func addToScan(
 	}
 
 	return toScan
+}
+
+func addToSelect(
+	toSelect []string,
+	fieldMap map[string]struct{},
+	field string,
+	dbFieldToSelect string,
+) []string {
+
+	if len(fieldMap) == 0 {
+		return append(toSelect, dbFieldToSelect)
+	}
+
+	_, exists := fieldMap[field]
+
+	if exists {
+		return append(toSelect, dbFieldToSelect)
+	}
+
+	return toSelect
 }
 
 func rowToProduct(
@@ -97,7 +121,7 @@ func rowToProduct(
 	toScan = addToScan(toScan, fieldMap, "created", &created)
 	toScan = addToScan(toScan, fieldMap, "lastUpdated", &lastUpdated)
 
-	err := rows.Scan(toScan)
+	err := rows.Scan(toScan...)
 
 	if err != nil {
 		return nil, err
@@ -152,19 +176,23 @@ func (repo ProductRepositoryImpl) GetProducts(
 	fields []string,
 ) ([]domain.Product, uint32, error) {
 
+	fieldMap := fieldsToMap(fields)
+
 	countQuery := sq.Select("count(*)").
 		From("product").
 		LeftJoin("product_barcode USING (product_id)")
 
-	query := sq.Select(
-		"product.product_id",
-		"product.title",
-		"product.sku",
-		"product.description",
-		"product.price",
-		"product.created",
-		"product.last_updated",
-	).
+	toSelect := []string{}
+
+	toSelect = addToSelect(toSelect, fieldMap, "productId", "product.product_id")
+	toSelect = addToSelect(toSelect, fieldMap, "title", "product.title")
+	toSelect = addToSelect(toSelect, fieldMap, "sku", "product.sku")
+	toSelect = addToSelect(toSelect, fieldMap, "description", "product.description")
+	toSelect = addToSelect(toSelect, fieldMap, "price", "product.price")
+	toSelect = addToSelect(toSelect, fieldMap, "created", "product.created")
+	toSelect = addToSelect(toSelect, fieldMap, "lastUpdated", "product.last_updated")
+
+	query := sq.Select(toSelect...).
 		LeftJoin("product_barcode USING (product_id)").
 		From("product").
 		Limit(num).
@@ -202,8 +230,6 @@ func (repo ProductRepositoryImpl) GetProducts(
 	inBuilder := strings.Builder{}
 
 	inBuilder.WriteString("product_id IN(")
-
-	fieldMap := fieldsToMap(fields)
 
 	for rows.Next() {
 		product, err := rowToProduct(rows, fieldMap)
@@ -319,18 +345,23 @@ func (repo ProductRepositoryImpl) GetProduct(
 	fields []string,
 ) (*domain.Product, bool, error) {
 
+	fieldMap := fieldsToMap(fields)
+
 	predicate := sq.Eq{
 		"product_id": id,
 	}
 
-	rows, err := sq.Select(
-		"product_id",
-		"title",
-		"sku",
-		"description",
-		"price",
-		"created",
-		"last_updated").
+	toSelect := []string{}
+
+	toSelect = addToSelect(toSelect, fieldMap, "productId", "product_id")
+	toSelect = addToSelect(toSelect, fieldMap, "title", "title")
+	toSelect = addToSelect(toSelect, fieldMap, "sku", "sku")
+	toSelect = addToSelect(toSelect, fieldMap, "description", "description")
+	toSelect = addToSelect(toSelect, fieldMap, "price", "price")
+	toSelect = addToSelect(toSelect, fieldMap, "created", "created")
+	toSelect = addToSelect(toSelect, fieldMap, "lastUpdated", "last_updated")
+
+	rows, err := sq.Select(toSelect...).
 		From("product").
 		Where(predicate).
 		RunWith(repo.DB).
@@ -347,8 +378,6 @@ func (repo ProductRepositoryImpl) GetProduct(
 	if !exists {
 		return nil, false, nil
 	}
-
-	fieldMap := fieldsToMap(fields)
 
 	product, err := rowToProduct(rows, fieldMap)
 
