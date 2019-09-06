@@ -3,7 +3,7 @@ package validation
 import (
 	"errors"
 	"fmt"
-	"sitoo/domain"
+	"api/domain"
 	"strconv"
 	"strings"
 )

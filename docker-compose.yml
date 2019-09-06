@@ -9,3 +9,6 @@ version: "3.7"
       MYSQL_DATABASE: sitoo_test_assignment
       MYSQL_USER: sitoo
       MYSQL_PASSWORD: test
+
+  api:
+    build: ./api

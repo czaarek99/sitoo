@@ -3,9 +3,9 @@ package services
 import (
 	"fmt"
 	"log"
-	"sitoo/domain"
-	"sitoo/util"
-	"sitoo/validation"
+	"api/domain"
+	"api/util"
+	"api/validation"
 )
 
 type ProductServiceImpl struct {

@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-	"sitoo/repositories"
-	"sitoo/servers"
-	"sitoo/services"
-	"sitoo/util"
+	"api/repositories"
+	"api/servers"
+	"api/services"
+	"api/util"
 
 	_ "github.com/go-sql-driver/mysql"
 )

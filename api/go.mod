@@ -1,4 +1,4 @@
-module sitoo
+module api
 
 go 1.12
 

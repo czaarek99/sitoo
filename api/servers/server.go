@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"path"
-	"sitoo/domain"
+	"api/domain"
 	"strconv"
 	"strings"
 )

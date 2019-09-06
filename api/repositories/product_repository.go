@@ -2,8 +2,8 @@ package repositories
 
 import (
 	"database/sql"
-	"sitoo/domain"
-	"sitoo/util"
+	"api/domain"
+	"api/util"
 	"strconv"
 	"strings"
 	"time"
