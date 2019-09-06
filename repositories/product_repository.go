@@ -615,7 +615,9 @@ func (repo ProductRepositoryImpl) BarcodesExist(
 	query := sq.Select("count(*) as count").From("product_barcode")
 
 	for barcode := range barcodes {
-		query = query.Where("barcode", barcode)
+		query = query.Where("barcode", sq.Eq{
+			"barcode": barcode,
+		})
 	}
 
 	queryString, args, err := query.ToSql()
