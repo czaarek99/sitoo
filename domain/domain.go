@@ -41,6 +41,11 @@ type ProductUpdateInput struct {
 	Attributes  []ProductAttribute `json:"attributes"`
 }
 
+type ProductBarcode struct {
+	ProductID ProductId
+	Barcode   string
+}
+
 type ProductService interface {
 	GetProducts(
 		start uint64,
@@ -69,8 +74,8 @@ type ProductRepository interface {
 	AddProduct(product ProductAddInput) (ProductId, error)
 	UpdateProduct(id ProductId, product ProductUpdateInput) error
 	DeleteProduct(id ProductId) error
+	GetBarcodes(barcodes []string) ([]ProductBarcode, error)
 	SkuExists(sku string) (bool, error)
-	BarcodesExist(barcode []string) (bool, error)
 	ProductExists(id ProductId) (bool, error)
 	AttributesExist(id ProductId, attributes []ProductAttribute) (bool, error)
 }

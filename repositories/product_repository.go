@@ -580,21 +580,27 @@ func (repo ProductRepositoryImpl) SkuExists(
 	return count > 0, nil
 }
 
-func (repo ProductRepositoryImpl) BarcodesExist(
-	barcodes []string,
-) (bool, error) {
+func stringsToInterfaces(strings []string) []interface{} {
 
-	query := sq.Select("COUNT(*)").From("product_barcode")
+	interfaces := make([]interface{}, len(strings))
+
+	for i := 0; i < len(strings); i++ {
+		interfaces[i] = strings[i]
+	}
+
+	return interfaces
+}
+
+func getWhereIn(
+	column string,
+	valueCount int,
+) string {
 
 	whereBuilder := strings.Builder{}
 	whereBuilder.WriteString("barcode IN(")
 
-	barcodesCopy := make([]interface{}, len(barcodes))
-
 	prefix := ""
-	for index, barcode := range barcodes {
-		barcodesCopy[index] = barcode
-
+	for i := 0; i < valueCount; i++ {
 		whereBuilder.WriteString(prefix)
 		prefix = ","
 		whereBuilder.WriteString("?")
@@ -602,21 +608,41 @@ func (repo ProductRepositoryImpl) BarcodesExist(
 
 	whereBuilder.WriteString(")")
 
-	query = query.Where(whereBuilder.String(), barcodesCopy...)
+	return whereBuilder.String()
+}
 
-	queryString, args, err := query.ToSql()
+func (repo ProductRepositoryImpl) GetBarcodes(
+	barcodes []string,
+) ([]domain.ProductBarcode, error) {
+
+	productBarcodes := []domain.ProductBarcode{}
+
+	query := sq.Select("product_id", "barcode").From("product_barcode")
+
+	interfaces := stringsToInterfaces(barcodes)
+	whereIn := getWhereIn("barcode", len(barcodes))
+
+	query = query.Where(whereIn, interfaces...)
+
+	rows, err := query.RunWith(repo.DB).Query()
 
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	count, err := repo.count(queryString, args...)
+	for rows.Next() {
+		barcode := domain.ProductBarcode{}
 
-	if err != nil {
-		return false, err
+		err := rows.Scan(&barcode.ProductID, &barcode.Barcode)
+
+		if err != nil {
+			return nil, err
+		}
+
+		productBarcodes = append(productBarcodes, barcode)
 	}
 
-	return count > 0, nil
+	return productBarcodes, nil
 }
 
 func (repo ProductRepositoryImpl) AttributesExist(
