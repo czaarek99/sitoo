@@ -525,3 +525,16 @@ func (repo ProductRepositoryImpl) SkuExists(
 
 	return count > 0, nil
 }
+
+func (repo ProductRepositoryImpl) BarcodeExists(
+	barcode string,
+) (bool, error) {
+
+	count, err := repo.count("SELECT COUNT(*) as count FROM product_barcode WHERE barcode = ?", barcode)
+
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
