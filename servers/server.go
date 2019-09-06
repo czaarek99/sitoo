@@ -9,7 +9,6 @@ import (
 	"strings"
 )
 
-//TODO: More logs
 //TODO: Don't leak normal logs
 
 const (
