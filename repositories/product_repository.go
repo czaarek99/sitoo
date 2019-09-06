@@ -17,11 +17,6 @@ type ProductRepositoryImpl struct {
 
 //TODO: Handle fields in database
 
-func (repo ProductRepositoryImpl) getTotalCount() (uint32, error) {
-	count, err := repo.count("SELECT COUNT(*) as count FROM product")
-	return count, err
-}
-
 func (repo ProductRepositoryImpl) count(
 	query string,
 	values ...interface{},
@@ -227,7 +222,7 @@ func (repo ProductRepositoryImpl) GetProducts(
 		return nil, 0, err
 	}
 
-	count, err := repo.getTotalCount()
+	count, err := repo.count("SELECT COUNT(*) as count FROM product")
 
 	if err != nil {
 		return nil, 0, err
