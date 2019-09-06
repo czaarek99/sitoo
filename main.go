@@ -2,13 +2,16 @@ package main
 
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"net/http"
 	"sitoo/repositories"
 	"sitoo/servers"
 	"sitoo/services"
+
+	_ "github.com/go-sql-driver/mysql"
 )
+
+//TODO: Document code
 
 func main() {
 	log.Println("Starting server")
