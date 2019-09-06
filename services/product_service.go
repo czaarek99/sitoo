@@ -23,7 +23,7 @@ func handleDatabaseError(err error) {
 	log.Println(err.Error())
 }
 
-func GetAttributeHash(attribute domain.ProductAttribute) string {
+func getAttributeHash(attribute domain.ProductAttribute) string {
 	attributeHash := strings.Builder{}
 	attributeHash.WriteString(attribute.Name)
 	attributeHash.WriteString("_")
@@ -44,6 +44,24 @@ func (service ProductServiceImpl) validateBarcodesAreUnique(
 
 	if len(barcodeSet) < len(barcodes) {
 		return errors.New("Barcodes not unique")
+	}
+
+	return nil
+}
+
+func (service ProductServiceImpl) validateAttributesAreUnique(
+	attributes []domain.ProductAttribute,
+) error {
+
+	attributeSet := map[string]struct{}{}
+
+	for _, attribute := range attributes {
+		hash := getAttributeHash(attribute)
+		attributeSet[hash] = struct{}{}
+	}
+
+	if len(attributeSet) < len(attributes) {
+		return errors.New("Attributes not unique")
 	}
 
 	return nil
@@ -110,6 +128,14 @@ func (service ProductServiceImpl) AddProduct(
 		return 0, errors.New(fmt.Sprintf("SKU '%s' already exists", product.Sku))
 	}
 
+	if len(product.Attributes) > 0 {
+		err := service.validateAttributesAreUnique(product.Attributes)
+
+		if err != nil {
+			return 0, err
+		}
+	}
+
 	if len(product.Barcodes) > 0 {
 		err := service.validateBarcodesAreUnique(product.Barcodes)
 
@@ -163,6 +189,14 @@ func (service ProductServiceImpl) UpdateProduct(
 
 		if productSku != nil && productSku.ProductID != id {
 			return errors.New(fmt.Sprintf("SKU '%s' already exists", product.Sku))
+		}
+	}
+
+	if len(product.Attributes) > 0 {
+		err := service.validateAttributesAreUnique(product.Attributes)
+
+		if err != nil {
+			return err
 		}
 	}
 
