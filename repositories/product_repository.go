@@ -584,7 +584,7 @@ func (repo ProductRepositoryImpl) BarcodesExist(
 	barcodes []string,
 ) (bool, error) {
 
-	query := sq.Select("count(*) as count").From("product_barcode")
+	query := sq.Select("COUNT(*)").From("product_barcode")
 
 	whereBuilder := strings.Builder{}
 	whereBuilder.WriteString("barcode IN(")
@@ -603,6 +603,46 @@ func (repo ProductRepositoryImpl) BarcodesExist(
 	whereBuilder.WriteString(")")
 
 	query = query.Where(whereBuilder.String(), barcodesCopy...)
+
+	queryString, args, err := query.ToSql()
+
+	if err != nil {
+		return false, err
+	}
+
+	count, err := repo.count(queryString, args...)
+
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
+func (repo ProductRepositoryImpl) AttributesExist(
+	id domain.ProductId,
+	attributes []domain.ProductAttribute,
+) (bool, error) {
+
+	query := sq.Select("COUNT(*)").From("product_attribute")
+
+	whereBuilder := strings.Builder{}
+	whereBuilder.WriteString("product_id = ? AND barcode IN(")
+
+	args := make([]interface{}, len(attributes))
+
+	prefix := ""
+	for index, attribute := range attributes {
+		args[index] = attribute.Name
+
+		whereBuilder.WriteString(prefix)
+		prefix = ","
+		whereBuilder.WriteString("?")
+	}
+
+	whereBuilder.WriteString(")")
+
+	query = query.Where(whereBuilder.String(), args...)
 
 	queryString, args, err := query.ToSql()
 

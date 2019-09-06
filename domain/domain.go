@@ -72,6 +72,7 @@ type ProductRepository interface {
 	SkuExists(sku string) (bool, error)
 	BarcodesExist(barcode []string) (bool, error)
 	ProductExists(id ProductId) (bool, error)
+	AttributesExist(id ProductId, attributes []ProductAttribute) (bool, error)
 }
 
 type ErrorResponse struct {
