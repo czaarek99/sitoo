@@ -246,25 +246,20 @@ func (repo ProductRepositoryImpl) GetProduct(
 	fields []string,
 ) (domain.Product, bool, error) {
 
+	predicate := sq.Eq{
+		"product_id": id,
+	}
+
 	rows, err := sq.Select(
-		"product.product_id",
-		"product.title",
-		"product.sku",
-		"product.description",
-		"product.price",
-		"product.created",
-		"product.last_updated",
-		"product_barcode.barcode",
-		"product_attribute.name",
-		"product_attribute.value",
-	).
-		LeftJoin("product_barcode USING (product_id)").
-		LeftJoin("product_attribute USING (product_id)").
+		"product_id",
+		"title",
+		"sku",
+		"description",
+		"price",
+		"created",
+		"last_updated").
 		From("product").
-		Where(sq.Eq{
-			"product_id": id,
-		}).
-		OrderBy("product.product_id").
+		Where(predicate).
 		RunWith(repo.DB).
 		Query()
 
@@ -274,13 +269,96 @@ func (repo ProductRepositoryImpl) GetProduct(
 		return domain.Product{}, false, err
 	}
 
-	products, count, err := rowsToProducts(rows)
+	exists := rows.Next()
 
-	if len(products) == 0 {
+	if !exists {
 		return domain.Product{}, false, nil
 	}
 
-	return products[0], count > 0, err
+	product := domain.Product{}
+
+	var created string
+	var lastUpdated *string
+
+	err = rows.Scan(
+		&product.ProductID,
+		&product.Title,
+		&product.Sku,
+		&product.Description,
+		&product.Price,
+		&created,
+		&lastUpdated,
+	)
+
+	if err != nil {
+		return domain.Product{}, false, err
+	}
+
+	if lastUpdated != nil {
+		lastUpdatedTimestamp, err := convertSQLDateToTimestamp(*lastUpdated)
+
+		if err != nil {
+			return domain.Product{}, false, err
+		}
+
+		product.LastUpdated = &lastUpdatedTimestamp
+	}
+
+	product.Created, err = convertSQLDateToTimestamp(created)
+
+	if err != nil {
+		return domain.Product{}, false, err
+	}
+
+	barcodeRows, err := sq.Select("barcode").
+		From("product_barcode").
+		Where(predicate).
+		RunWith(repo.DB).
+		Query()
+
+	if err != nil {
+		return domain.Product{}, false, err
+	}
+
+	for barcodeRows.Next() {
+		var barcode string
+
+		err := barcodeRows.Scan(&barcode)
+
+		if err != nil {
+			return domain.Product{}, false, err
+		}
+
+		product.Barcodes = append(product.Barcodes, barcode)
+	}
+
+	attributeRows, err := sq.Select("name", "value").
+		From("product_attribute").
+		Where(predicate).
+		RunWith(repo.DB).
+		Query()
+
+	if err != nil {
+		return domain.Product{}, false, err
+	}
+
+	for attributeRows.Next() {
+		var name string
+		var value string
+
+		err := attributeRows.Scan(&name, &value)
+
+		if err != nil {
+			return domain.Product{}, false, err
+		}
+
+		product.Attributes = append(product.Attributes, domain.ProductAttribute{
+			Name:  name,
+			Value: value,
+		})
+	}
+
+	return product, true, nil
 }
 
 func (repo ProductRepositoryImpl) AddProduct(
