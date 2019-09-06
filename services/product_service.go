@@ -116,7 +116,7 @@ func (service ProductServiceImpl) GetProduct(
 		handleDatabaseError(err)
 		return nil, getGenericDatabaseError()
 	} else if !exists {
-		newErr := errors.New(fmt.Sprintf("Can't find product %v", id))
+		newErr := fmt.Errorf("Can't find product %v", id)
 		return nil, newErr
 	}
 
@@ -137,7 +137,7 @@ func (service ProductServiceImpl) AddProduct(
 	}
 
 	if productSku != nil {
-		return 0, errors.New(fmt.Sprintf("SKU '%s' already exists", product.Sku))
+		return 0, fmt.Errorf("SKU '%s' already exists", product.Sku)
 	}
 
 	if len(product.Attributes) > 0 {
@@ -189,7 +189,7 @@ func (service ProductServiceImpl) UpdateProduct(
 	}
 
 	if !exists {
-		return errors.New(fmt.Sprintf("Can't find product %v", id))
+		return fmt.Errorf("Can't find product %v", id)
 	}
 
 	if product.Sku != nil {
@@ -200,10 +200,9 @@ func (service ProductServiceImpl) UpdateProduct(
 		}
 
 		if productSku != nil && productSku.ProductID != id {
-			return errors.New(fmt.Sprintf("SKU '%s' already exists", product.Sku))
+			return fmt.Errorf("SKU '%s' already exists", *product.Sku)
 		}
 	}
-
 	if len(product.Attributes) > 0 {
 		err := service.validateAttributes(product.Attributes)
 
@@ -256,7 +255,7 @@ func (service ProductServiceImpl) DeleteProduct(
 	}
 
 	if !exists {
-		return errors.New(fmt.Sprintf("Product with productId (%v) does not exist", id))
+		return fmt.Errorf("Product with productId (%v) does not exist", id)
 	}
 
 	err = service.Repo.DeleteProduct(id)
