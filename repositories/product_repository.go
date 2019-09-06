@@ -3,6 +3,7 @@ package repositories
 import (
 	"database/sql"
 	"sitoo/domain"
+	"sitoo/util"
 	"strconv"
 	"strings"
 	"time"
@@ -38,15 +39,6 @@ func (repo ProductRepositoryImpl) count(
 	}
 
 	return count, nil
-}
-
-func getAttributeHash(attribute domain.ProductAttribute) string {
-	attributeHash := strings.Builder{}
-	attributeHash.WriteString(attribute.Name)
-	attributeHash.WriteString("_")
-	attributeHash.WriteString(attribute.Value)
-
-	return attributeHash.String()
 }
 
 func convertSQLDateToTimestamp(date string) (int64, error) {
@@ -97,17 +89,6 @@ func rowToProduct(rows *sql.Rows) (*domain.Product, error) {
 	}
 
 	return &product, nil
-}
-
-func stringsToInterfaces(strings []string) []interface{} {
-
-	interfaces := make([]interface{}, len(strings))
-
-	for i := 0; i < len(strings); i++ {
-		interfaces[i] = strings[i]
-	}
-
-	return interfaces
 }
 
 func getWhereIn(
@@ -641,7 +622,7 @@ func (repo ProductRepositoryImpl) GetBarcodes(
 
 	query := sq.Select("product_id", "barcode").From("product_barcode")
 
-	interfaces := stringsToInterfaces(barcodes)
+	interfaces := util.StringsToInterfaces(barcodes)
 	whereIn := getWhereIn("barcode", len(barcodes))
 
 	query = query.Where(whereIn, interfaces...)

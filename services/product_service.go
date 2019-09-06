@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"sitoo/domain"
+	"strings"
 )
 
 //TODO: Disallow non unique product-attributes
@@ -20,6 +21,15 @@ func getGenericDatabaseError() error {
 func handleDatabaseError(err error) {
 	log.Println("Database error:")
 	log.Println(err.Error())
+}
+
+func GetAttributeHash(attribute domain.ProductAttribute) string {
+	attributeHash := strings.Builder{}
+	attributeHash.WriteString(attribute.Name)
+	attributeHash.WriteString("_")
+	attributeHash.WriteString(attribute.Value)
+
+	return attributeHash.String()
 }
 
 func (service ProductServiceImpl) validateBarcodesAreUnique(
