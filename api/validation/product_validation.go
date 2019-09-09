@@ -1,9 +1,10 @@
 package validation
 
 import (
+	"api/domain"
 	"errors"
 	"fmt"
-	"api/domain"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -118,7 +119,7 @@ func validatePrice(price string) error {
 		return fmt.Errorf("Product price (%s) is not a valid decimal", price)
 	}
 
-	if float > 10^10 {
+	if float > math.Pow(10, 7) {
 		return fmt.Errorf("Product price (%s) is too big", price)
 	}
 
