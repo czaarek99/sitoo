@@ -48,13 +48,13 @@ that the data we receive is not breaking any specification rules.
 #### product_repository.go
 
 Once the service is done with all of its work it will talk to the repository
-which is our database layer. The repositories will make all the queries to the
+which is our database layer. The repository will make all the queries to the
 database and return whatever data it received.
 
 When we get a response from the repository it will propogate backwards through
 all the layers and the server will marshall it to json and respond to the client.
 
-### Advantes & Disadvantages
+### Advantages & Disadvantages
 
 The biggest advantage of this approach is that we could one day in the future
 decide that we want to use MongoDB as our database layer instead of MySQL.
@@ -65,3 +65,8 @@ Another example is if we suddenly decide we do not want to use json for
 communication but protobufs. We could just rewrite the server layer
 and not touch the other layers.
 
+A disadvantage with this model is that it adds a bit of complexity to
+the code if you haven't seen this kind of approach from the beginning.
+So if you just need a quick server then this route is probably not ideal.
+But if you have a microservice architechture that is still growing this
+approach is great because you can easily swap things out.
