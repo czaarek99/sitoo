@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -16,10 +17,14 @@ import (
 func main() {
 	log.Println("Starting server")
 
-	connectionString := "root@/sitoo_test_assignment"
+	var connectionString string
 
-	if os.Args[2] == "docker" {
+	if len(os.Args) > 1 && os.Args[1] == "docker" {
+		log.Printf("Using docker")
 		connectionString = "sitoo:test@database/sitoo_test_assignment"
+	} else {
+		log.Printf("Running standalone")
+		connectionString = "root@/sitoo_test_assignment"
 	}
 
 	connection, err := sql.Open("mysql", connectionString)
@@ -28,11 +33,24 @@ func main() {
 		log.Fatal("Could not connect to database")
 	}
 
-	err = connection.Ping()
+	retryCount := 0
 
-	if err != nil {
-		log.Print(err.Error())
-		log.Fatal("Could not ping database")
+	for {
+		err := connection.Ping()
+
+		if retryCount > 10 {
+			log.Fatal("Unable to ping database 10 times, giving up")
+		}
+
+		if err != nil {
+			log.Println("Could not ping database, retrying soon")
+			log.Print(err.Error())
+			retryCount++
+
+			time.Sleep(2 * time.Second)
+		} else {
+			break
+		}
 	}
 
 	var requestId uint32
