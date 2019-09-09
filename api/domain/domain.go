@@ -7,8 +7,8 @@ import (
 type ProductId = uint32
 
 type ProductAttribute struct {
-	Name  string
-	Value string
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 type Product struct {
