@@ -1,10 +1,10 @@
 package servers
 
 import (
+	"api/domain"
 	"encoding/json"
 	"net/http"
 	"path"
-	"api/domain"
 	"strconv"
 	"strings"
 )
@@ -185,8 +185,8 @@ func (server Server) handlePOST(
 	}
 
 	idString := strconv.FormatUint(uint64(id), 10)
-	writer.Write([]byte(idString))
 	writer.WriteHeader(http.StatusOK)
+	writer.Write([]byte(idString))
 }
 
 func (server Server) handlePUT(
