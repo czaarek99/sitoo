@@ -21,6 +21,13 @@ func main() {
 		log.Fatal("Could not connect to database")
 	}
 
+	err = connection.Ping()
+
+	if err != nil {
+		log.Print(err.Error())
+		log.Fatal("Could not ping database")
+	}
+
 	var requestId uint32
 
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
