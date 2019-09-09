@@ -43,9 +43,7 @@ func main() {
 		}
 
 		if err != nil {
-			log.Println("Could not ping database, retrying soon")
-
-			log.Print(err.Error())
+			log.Printf("Could not ping database with error %s", err.Error())
 			retryCount++
 
 			time.Sleep(2 * time.Second)
