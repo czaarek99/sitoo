@@ -105,7 +105,7 @@ func validateSku(sku string) error {
 
 func validateDescription(description string) error {
 	if len(description) > 1024 {
-		return fmt.Errorf("Product description (%s) is longer than max of 1024 characters", description)
+		return fmt.Errorf("Product description is longer than max of 1024 characters")
 	}
 
 	return nil
