@@ -24,6 +24,8 @@ func main() {
 	var requestId uint32
 
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		requestId++
+
 		repo := repositories.ProductRepositoryImpl{
 			DB: connection,
 		}
