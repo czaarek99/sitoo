@@ -178,7 +178,7 @@ func (repo ProductRepositoryImpl) GetProducts(
 
 	fieldMap := fieldsToMap(fields)
 
-	countQuery := sq.Select("count(*)").
+	countQuery := sq.Select("count(distinct product.product_id)").
 		From("product").
 		LeftJoin("product_barcode USING (product_id)")
 
