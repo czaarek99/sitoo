@@ -73,7 +73,7 @@ func writeJSON(
 	}
 }
 
-func getProductIdFromPath(
+func getProductIDFromPath(
 	requestPath string,
 ) (domain.ProductId, error) {
 	base := path.Base(requestPath)
@@ -90,7 +90,7 @@ func parseGET(request *http.Request) parsedGET {
 
 	parsed := parsedGET{}
 
-	productID, err := getProductIdFromPath(request.URL.Path)
+	productID, err := getProductIDFromPath(request.URL.Path)
 
 	query := request.URL.Query()
 
@@ -199,7 +199,7 @@ func (server Server) handlePUT(
 	request *http.Request,
 ) {
 
-	id, err := getProductIdFromPath(request.URL.Path)
+	id, err := getProductIDFromPath(request.URL.Path)
 
 	if err != nil {
 		writeError(writer, getBadRequestResponse("Missing product id to patch"))
@@ -234,7 +234,7 @@ func (server Server) handleDELETE(
 	request *http.Request,
 ) {
 
-	id, err := getProductIdFromPath(request.URL.Path)
+	id, err := getProductIDFromPath(request.URL.Path)
 
 	if err != nil {
 		writeError(writer, getBadRequestResponse("Bad Request"))
