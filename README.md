@@ -16,6 +16,8 @@ all the data in the database will dissapear**
 Once docker is installed just cd into the main directory and run
 `docker-compose up`
 
+Once the docker containers are running the api can be reached at http://127.0.0.1/api/products
+
 ### Libraries
 
 Other than the built in standard library the project uses two external
