@@ -392,7 +392,7 @@ func (repo ProductRepositoryImpl) GetProduct(
 
 	_, hasBarcodesField := fieldMap["barcodes"]
 
-	if hasBarcodesField {
+	if hasBarcodesField || len(fields) == 0 {
 		barcodeRows, err := sq.Select("barcode").
 			From("product_barcode").
 			Where(predicate).
@@ -420,7 +420,7 @@ func (repo ProductRepositoryImpl) GetProduct(
 
 	_, hasAttributeFields := fieldMap["attributes"]
 
-	if hasAttributeFields {
+	if hasAttributeFields || len(fields) == 0 {
 		attributeRows, err := sq.Select("name", "value").
 			From("product_attribute").
 			Where(predicate).
