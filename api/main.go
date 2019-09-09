@@ -38,15 +38,15 @@ func main() {
 	for {
 		err := connection.Ping()
 
-		if retryCount > 10 {
-			log.Fatal("Unable to ping database 10 times, giving up")
+		if retryCount > 20 {
+			log.Fatal("Unable to ping database 20 times, giving up")
 		}
 
 		if err != nil {
 			log.Printf("Could not ping database with error %s", err.Error())
 			retryCount++
 
-			time.Sleep(2 * time.Second)
+			time.Sleep(3 * time.Second)
 		} else {
 			log.Println("Database ping successful!")
 			break
