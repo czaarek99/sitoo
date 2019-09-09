@@ -84,11 +84,6 @@ type ProductRepository interface {
 	ProductExists(id ProductId) (bool, error)
 }
 
-type ErrorResponse struct {
-	ErrorText    string `json:"errorText"`
-	ResponseCode int    `json:"-"`
-}
-
 type ProductServer interface {
 	HandleRequest(writer http.ResponseWriter, request *http.Request)
 }

@@ -20,6 +20,11 @@ type Server struct {
 	Service domain.ProductService
 }
 
+type errorResponse struct {
+	ErrorText    string `json:"errorText"`
+	responseCode int
+}
+
 type parsedGET struct {
 	productID domain.ProductId
 	getType   int
@@ -31,25 +36,25 @@ type parsedGET struct {
 	fields  []string
 }
 
-func getBadRequestResponse(text string) domain.ErrorResponse {
-	return domain.ErrorResponse{
+func getBadRequestResponse(text string) errorResponse {
+	return errorResponse{
 		ErrorText:    text,
-		ResponseCode: 400,
+		responseCode: 400,
 	}
 }
 
-func getNotFoundResponse() domain.ErrorResponse {
-	return domain.ErrorResponse{
+func getNotFoundResponse() errorResponse {
+	return errorResponse{
 		ErrorText:    "Not found",
-		ResponseCode: 404,
+		responseCode: 404,
 	}
 }
 
 func writeError(
 	writer http.ResponseWriter,
-	errorResponse domain.ErrorResponse,
+	errorResponse errorResponse,
 ) {
-	writeJson(writer, errorResponse, errorResponse.ResponseCode)
+	writeJson(writer, errorResponse, errorResponse.responseCode)
 }
 
 func writeJson(
@@ -253,7 +258,7 @@ func (server Server) HandleRequest(
 	request *http.Request,
 ) {
 
-	var notFoundError domain.ErrorResponse
+	var notFoundError errorResponse
 
 	path := request.URL.Path
 
@@ -275,7 +280,7 @@ func (server Server) HandleRequest(
 		notFoundError = getNotFoundResponse()
 	}
 
-	if notFoundError.ResponseCode != 0 {
+	if notFoundError.responseCode != 0 {
 		writeError(writer, notFoundError)
 	}
 }
