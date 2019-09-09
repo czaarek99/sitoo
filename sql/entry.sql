@@ -1,5 +1,4 @@
 CREATE SCHEMA IF NOT EXISTS `sitoo_test_assignment`
-
 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS `sitoo_test_assignment`.`product` (
  `product_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -24,4 +23,5 @@ CREATE TABLE IF NOT EXISTS `sitoo_test_assignment`.`product_attribute` (
  `product_id` INT UNSIGNED NOT NULL,
  `name` VARCHAR(16) NOT NULL,
  `value` VARCHAR(32) NOT NULL,
- PRIMARY KEY (`product_id`,
+ PRIMARY KEY (`product_id`, `name`)
+);
