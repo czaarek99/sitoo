@@ -1,9 +1,9 @@
 package repositories
 
 import (
-	"database/sql"
 	"api/domain"
 	"api/util"
+	"database/sql"
 	"strconv"
 	"strings"
 	"time"
@@ -578,7 +578,7 @@ func (repo ProductRepositoryImpl) UpdateProduct(
 		return err
 	}
 
-	if len(product.Barcodes) > 0 {
+	if product.Barcodes != nil {
 		_, err = sq.Delete("product_barcode").Where(predicate).RunWith(tx).Query()
 
 		if err != nil {
@@ -586,17 +586,19 @@ func (repo ProductRepositoryImpl) UpdateProduct(
 			return err
 		}
 
-		barcodeInsert := sq.Insert("product_barcode").Columns("product_id", "barcode")
+		if len(product.Barcodes) > 0 {
+			barcodeInsert := sq.Insert("product_barcode").Columns("product_id", "barcode")
 
-		for _, barcode := range product.Barcodes {
-			barcodeInsert = barcodeInsert.Values(id, barcode)
-		}
+			for _, barcode := range product.Barcodes {
+				barcodeInsert = barcodeInsert.Values(id, barcode)
+			}
 
-		_, err = barcodeInsert.RunWith(tx).Query()
+			_, err = barcodeInsert.RunWith(tx).Query()
 
-		if err != nil {
-			tx.Rollback()
-			return err
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
 		}
 	}
 
