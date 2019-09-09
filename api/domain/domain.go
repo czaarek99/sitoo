@@ -11,6 +11,16 @@ type ProductAttribute struct {
 	Value string `json:"value"`
 }
 
+type ProductBarcode struct {
+	ProductID ProductId
+	Barcode   string
+}
+
+type ProductSku struct {
+	ProductID ProductId
+	Sku       string
+}
+
 type Product struct {
 	ProductID   ProductId          `json:"productId,omitempty"`
 	Title       string             `json:"title,omitempty"`
@@ -39,16 +49,6 @@ type ProductUpdateInput struct {
 	Description *string            `json:"description"`
 	Price       *string            `json:"price"`
 	Attributes  []ProductAttribute `json:"attributes"`
-}
-
-type ProductBarcode struct {
-	ProductID ProductId
-	Barcode   string
-}
-
-type ProductSku struct {
-	ProductID ProductId
-	Sku       string
 }
 
 type ProductService interface {
