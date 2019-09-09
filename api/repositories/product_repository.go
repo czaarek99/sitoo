@@ -602,7 +602,7 @@ func (repo ProductRepositoryImpl) UpdateProduct(
 		}
 	}
 
-	if len(product.Attributes) > 0 {
+	if product.Attributes != nil {
 		_, err = sq.Delete("product_attribute").Where(predicate).RunWith(repo.DB).Query()
 
 		if err != nil {
@@ -610,17 +610,19 @@ func (repo ProductRepositoryImpl) UpdateProduct(
 			return err
 		}
 
-		attribtueInsert := sq.Insert("product_attribute").Columns("product_id", "name", "value")
+		if len(product.Attributes) > 0 {
+			attribtueInsert := sq.Insert("product_attribute").Columns("product_id", "name", "value")
 
-		for _, attribute := range product.Attributes {
-			attribtueInsert = attribtueInsert.Values(id, attribute.Name, attribute.Value)
-		}
+			for _, attribute := range product.Attributes {
+				attribtueInsert = attribtueInsert.Values(id, attribute.Name, attribute.Value)
+			}
 
-		_, err := attribtueInsert.RunWith(repo.DB).Query()
+			_, err := attribtueInsert.RunWith(repo.DB).Query()
 
-		if err != nil {
-			tx.Rollback()
-			return err
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
 		}
 	}
 
