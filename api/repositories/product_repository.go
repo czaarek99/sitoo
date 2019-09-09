@@ -226,12 +226,15 @@ func (repo ProductRepositoryImpl) GetProducts(
 
 	productsMap := map[domain.ProductId]domain.Product{}
 
+	productCount := 0
 	prefix := ""
 	inBuilder := strings.Builder{}
 
 	inBuilder.WriteString("product_id IN(")
 
 	for rows.Next() {
+		productCount++
+
 		product, err := rowToProduct(rows, fieldMap)
 
 		if err != nil {
@@ -249,73 +252,75 @@ func (repo ProductRepositoryImpl) GetProducts(
 
 	inBuilder.WriteString(")")
 
-	_, hasBarcodesField := fieldMap["barcodes"]
+	if productCount > 0 {
+		_, hasBarcodesField := fieldMap["barcodes"]
 
-	if hasBarcodesField {
-		barcodeRows, err := sq.Select("product_id", "barcode").
-			From("product_barcode").
-			Where(inBuilder.String()).
-			RunWith(repo.DB).
-			Query()
+		if hasBarcodesField || len(fieldMap) == 0 {
+			barcodeRows, err := sq.Select("product_id", "barcode").
+				From("product_barcode").
+				Where(inBuilder.String()).
+				RunWith(repo.DB).
+				Query()
 
-		defer barcodeRows.Close()
-
-		if err != nil {
-			return nil, 0, err
-		}
-
-		for barcodeRows.Next() {
-			var productID uint32
-			var barcode string
-
-			err := barcodeRows.Scan(&productID, &barcode)
+			defer barcodeRows.Close()
 
 			if err != nil {
 				return nil, 0, err
 			}
 
-			product := productsMap[productID]
-			product.Barcodes = append(product.Barcodes, barcode)
+			for barcodeRows.Next() {
+				var productID uint32
+				var barcode string
 
-			productsMap[productID] = product
-		}
-	}
+				err := barcodeRows.Scan(&productID, &barcode)
 
-	_, hasAttributesField := fieldMap["attributes"]
+				if err != nil {
+					return nil, 0, err
+				}
 
-	if hasAttributesField {
-		attributeRows, err := sq.Select("product_id", "name", "value").
-			From("product_attribute").
-			Where(inBuilder.String()).
-			RunWith(repo.DB).
-			Query()
+				product := productsMap[productID]
+				product.Barcodes = append(product.Barcodes, barcode)
 
-		defer attributeRows.Close()
-
-		if err != nil {
-			return nil, 0, err
+				productsMap[productID] = product
+			}
 		}
 
-		for attributeRows.Next() {
-			var productID uint32
-			var name string
-			var value string
+		_, hasAttributesField := fieldMap["attributes"]
 
-			err := attributeRows.Scan(&productID, &name, &value)
+		if hasAttributesField || len(fieldMap) == 0 {
+			attributeRows, err := sq.Select("product_id", "name", "value").
+				From("product_attribute").
+				Where(inBuilder.String()).
+				RunWith(repo.DB).
+				Query()
+
+			defer attributeRows.Close()
 
 			if err != nil {
 				return nil, 0, err
 			}
 
-			attribute := domain.ProductAttribute{
-				Name:  name,
-				Value: value,
+			for attributeRows.Next() {
+				var productID uint32
+				var name string
+				var value string
+
+				err := attributeRows.Scan(&productID, &name, &value)
+
+				if err != nil {
+					return nil, 0, err
+				}
+
+				attribute := domain.ProductAttribute{
+					Name:  name,
+					Value: value,
+				}
+
+				product := productsMap[productID]
+				product.Attributes = append(product.Attributes, attribute)
+
+				productsMap[productID] = product
 			}
-
-			product := productsMap[productID]
-			product.Attributes = append(product.Attributes, attribute)
-
-			productsMap[productID] = product
 		}
 	}
 
