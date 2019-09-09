@@ -81,9 +81,18 @@ func getProductIDFromPath(
 	return domain.ProductId(id), err
 }
 
-//Assumes properly formatted GET
-//Too much time to write a parser
-//Could use a library but this show i know more right?
+/*
+
+This function assumes a properly formatted GET HTTP
+request. Validating the request would be a lot of work
+and probably out of scope for this assignment.
+
+In the case of a production server a multiplexer
+should for sure be used.
+
+For exmple: https://github.com/go-zoo/bone
+
+*/
 func parseGET(request *http.Request) parsedGET {
 
 	parsed := parsedGET{}
