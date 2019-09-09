@@ -57,6 +57,10 @@ func validateAttributes(attributes []domain.ProductAttribute) error {
 		attributeSet := map[string]struct{}{}
 
 		for _, attribute := range attributes {
+			if len(attribute.Name) == 0 {
+				return fmt.Errorf("Attribute name can not be empty")
+			}
+
 			if len(attribute.Name) > 16 {
 				return fmt.Errorf("Attribute name (%s) is longer than max of 16 characters", attribute.Name)
 			}
