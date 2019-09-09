@@ -197,7 +197,7 @@ func (server Server) handlePOST(
 	}
 
 	idString := strconv.FormatUint(uint64(id), 10)
-	writer.WriteHeader(http.StatusOK)
+	writer.WriteHeader(http.StatusCreated)
 	writer.Write([]byte(idString))
 }
 
