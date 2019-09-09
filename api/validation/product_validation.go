@@ -11,9 +11,9 @@ import (
 
 func getAttributeHash(attribute domain.ProductAttribute) string {
 	attributeHash := strings.Builder{}
-	attributeHash.WriteString(attribute.Name)
+	attributeHash.WriteString(strings.ToLower(attribute.Name))
 	attributeHash.WriteString("_")
-	attributeHash.WriteString(attribute.Value)
+	attributeHash.WriteString(strings.ToLower(attribute.Value))
 
 	return attributeHash.String()
 }
