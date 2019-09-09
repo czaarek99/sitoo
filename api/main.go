@@ -12,8 +12,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-//TODO: Document code
-
 func main() {
 	log.Println("Starting server")
 

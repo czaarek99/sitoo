@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-//TODO: Don't leak normal logs
-
 const (
 	singleGET   = iota
 	multipleGET = iota
