@@ -21,7 +21,7 @@ func main() {
 
 	if len(os.Args) > 1 && os.Args[1] == "docker" {
 		log.Printf("Using docker")
-		connectionString = "sitoo:test@database/sitoo_test_assignment"
+		connectionString = "sitoo:test@tcp(database)/sitoo_test_assignment"
 	} else {
 		log.Printf("Running standalone")
 		connectionString = "root@/sitoo_test_assignment"
@@ -30,7 +30,7 @@ func main() {
 	connection, err := sql.Open("mysql", connectionString)
 
 	if err != nil {
-		log.Fatal("Could not connect to database")
+		log.Fatal("Could not open database connection")
 	}
 
 	retryCount := 0
@@ -44,11 +44,13 @@ func main() {
 
 		if err != nil {
 			log.Println("Could not ping database, retrying soon")
+
 			log.Print(err.Error())
 			retryCount++
 
 			time.Sleep(2 * time.Second)
 		} else {
+			log.Println("Database ping successful!")
 			break
 		}
 	}
