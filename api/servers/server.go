@@ -197,7 +197,7 @@ func (server Server) handlePUT(
 	id, err := getProductIdFromPath(request.URL.Path)
 
 	if err != nil {
-		writeError(writer, getBadRequestResponse("Bad Request"))
+		writeError(writer, getBadRequestResponse("Missing product id to patch"))
 		return
 	}
 
