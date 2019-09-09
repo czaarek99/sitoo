@@ -54,10 +54,10 @@ func writeError(
 	writer http.ResponseWriter,
 	errorResponse errorResponse,
 ) {
-	writeJson(writer, errorResponse, errorResponse.responseCode)
+	writeJSON(writer, errorResponse, errorResponse.responseCode)
 }
 
-func writeJson(
+func writeJSON(
 	writer http.ResponseWriter,
 	item interface{},
 	statusCode int,
@@ -137,7 +137,7 @@ func (server Server) handleGET(
 		if error != nil {
 			writeError(writer, getBadRequestResponse(error.Error()))
 		} else {
-			writeJson(writer, product, http.StatusOK)
+			writeJSON(writer, product, http.StatusOK)
 		}
 	} else {
 		products, count, error := server.Service.GetProducts(
@@ -159,7 +159,7 @@ func (server Server) handleGET(
 				Items:      products,
 			}
 
-			writeJson(writer, envelope, http.StatusOK)
+			writeJSON(writer, envelope, http.StatusOK)
 		}
 	}
 }
