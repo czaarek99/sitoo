@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -15,7 +16,13 @@ import (
 func main() {
 	log.Println("Starting server")
 
-	connection, err := sql.Open("mysql", "sitoo:test@database/sitoo_test_assignment")
+	connectionString := "root@/sitoo_test_assignment"
+
+	if os.Args[2] == "docker" {
+		connectionString = "sitoo:test@database/sitoo_test_assignment"
+	}
+
+	connection, err := sql.Open("mysql", connectionString)
 
 	if err != nil {
 		log.Fatal("Could not connect to database")
