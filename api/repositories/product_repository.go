@@ -589,6 +589,7 @@ func (repo ProductRepositoryImpl) UpdateProduct(
 		query = query.Set("price", product.Price)
 	}
 
+	//Transaction for the same reason as the func above
 	tx, err := repo.DB.Begin()
 
 	if err != nil {
