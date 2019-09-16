@@ -148,6 +148,11 @@ func rowToProduct(
 	return &product, nil
 }
 
+/*
+The squirrel library does not support whereIn natively
+so we build our own helper function that constructs
+that part of the where query.
+*/
 func getWhereIn(
 	column string,
 	valueCount int,
