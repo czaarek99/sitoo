@@ -505,6 +505,13 @@ func (repo ProductRepositoryImpl) AddProduct(
 		return 0, err
 	}
 
+	/*
+		We wrap everything in a transaction to make sure we
+		either get a complete barcode record or nothing.
+
+		Otherwise we risk having attribute records that are
+		not actually linked to anything.
+	*/
 	res, err := tx.Exec(query, args...)
 
 	if err != nil {
