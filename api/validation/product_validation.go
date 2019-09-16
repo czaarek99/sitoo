@@ -134,6 +134,14 @@ func validatePrice(price string) error {
 	return nil
 }
 
+/*
+Probably one of the most important parts of the validation.
+
+It prevents SQL injections attacks by making sure that
+the fields that the user has passed are valid fields
+in the database. Otherwise they could pass a field
+that is a SQL injection string and we would be screwed.
+*/
 func ValidateFields(fields []string) error {
 	allowedFields := map[string]struct{}{}
 
