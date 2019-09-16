@@ -14,6 +14,12 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+/*
+In our main() we just set up our http server and our
+connection to the database. Then we construct the
+repo, service and server to actually handle
+all the incoming requests.
+*/
 func main() {
 	log.Println("Starting server")
 
