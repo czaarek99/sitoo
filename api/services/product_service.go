@@ -1,11 +1,11 @@
 package services
 
 import (
-	"fmt"
-	"log"
 	"api/domain"
 	"api/util"
 	"api/validation"
+	"fmt"
+	"log"
 )
 
 type ProductServiceImpl struct {
@@ -22,6 +22,12 @@ func (service ProductServiceImpl) log(
 	log.Printf("requestId=%v data/message=%s", service.Metadata.RequestID, message)
 }
 
+/*
+We do not want to leak database errors to the user because
+that would not be great security. So we log the error
+instead while returning a generic "Database Error"
+message.
+*/
 func (service ProductServiceImpl) handleDatabaseError(
 	err error,
 ) {
