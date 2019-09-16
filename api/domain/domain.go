@@ -4,6 +4,14 @@ import (
 	"net/http"
 )
 
+/*
+The domain file defines our Service and Repository
+interfaces. It also defines all the interfaces
+that are needed to make them work. The domain
+is essentially the mold that the project
+needs to adhere to and simplifies future updates.
+*/
+
 type ProductId = uint32
 
 type ProductAttribute struct {
