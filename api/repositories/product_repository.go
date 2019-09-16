@@ -209,6 +209,13 @@ func (repo ProductRepositoryImpl) GetProducts(
 		}
 
 		query = query.Where(predicate)
+		/*
+			Usually the count is used for pagination in Tables
+			that show the data. Therefore we need to filter the
+			count based on our current filter. It would be strange
+			if our table said for example 0/1000 but you could only
+			get one record to display with your current filter.
+		*/
 		countQuery = countQuery.Where(predicate)
 	}
 
