@@ -693,6 +693,11 @@ func (repo ProductRepositoryImpl) DeleteProduct(
 	return nil
 }
 
+/*
+The functions below are used for validation
+by the service
+*/
+
 func (repo ProductRepositoryImpl) ProductExists(
 	id domain.ProductId,
 ) (bool, error) {
